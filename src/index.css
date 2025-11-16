@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0a0e27;
+  color: #00d4ff;
+  overflow-x: hidden;
+}
+
+/* Cyberpunk grid background */
+.cyber-grid {
+  background-image: 
+    linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0, 0 0;
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 50px 50px, 50px 50px;
+  }
+}
+
+/* Glitch effect */
+.glitch {
+  position: relative;
+  animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+  0%, 100% {
+    text-shadow: 2px 2px #ff00ff, -2px -2px #00d4ff;
+  }
+  25% {
+    text-shadow: -2px 2px #ff00ff, 2px -2px #00d4ff;
+  }
+  50% {
+    text-shadow: 2px -2px #ff00ff, -2px 2px #00d4ff;
+  }
+  75% {
+    text-shadow: -2px -2px #ff00ff, 2px 2px #00d4ff;
+  }
+}
+
+/* Neon button */
+.neon-btn {
+  position: relative;
+  border: 2px solid;
+  padding: 1rem 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s;
+  cursor: pointer;
+  background: transparent;
+}
+
+.neon-btn:hover {
+  box-shadow: 0 0 20px currentColor, inset 0 0 20px currentColor;
+  transform: scale(1.05);
+}
+
+/* Dice animation */
+@keyframes diceRoll {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  10% { transform: rotate(36deg) scale(1.15) translateY(-5px); }
+  20% { transform: rotate(-30deg) scale(0.95) translateY(5px); }
+  30% { transform: rotate(72deg) scale(1.1) translateY(-3px); }
+  40% { transform: rotate(-60deg) scale(0.9) translateY(3px); }
+  50% { transform: rotate(144deg) scale(1.05) translateY(-2px); }
+  60% { transform: rotate(-90deg) scale(1.0) translateY(2px); }
+  70% { transform: rotate(216deg) scale(1.02) translateY(-1px); }
+  80% { transform: rotate(-120deg) scale(1.0) translateY(1px); }
+  90% { transform: rotate(288deg) scale(1.01); }
+}
+
+.dice-rolling {
+  animation: diceRoll 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Pulse animation for active elements */
+@keyframes pulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px rgba(57, 255, 20, 0);
+  }
+}
+
+.pulse-green {
+  animation: pulse 2s infinite;
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+/* Pop in animation */
+@keyframes popIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pop-in {
+  animation: popIn 0.3s ease-out;
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+/* Flicker animation */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.flicker {
+  animation: flicker 0.15s ease-in-out 3;
+}
+
+/* Glow pulse for locked dice */
+@keyframes glowPulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(57, 255, 20, 0.8);
+  }
+}
+
+.glow-pulse {
+  animation: glowPulse 1.5s ease-in-out infinite;
+}

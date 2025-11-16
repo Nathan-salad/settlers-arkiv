@@ -1,0 +1,360 @@
+import { useState, useEffect } from 'react'
+import useGameStore from '../store/gameStore'
+import Dice from './Dice'
+import ResourceIcon from './ResourceIcon'
+import ResourceDisplay from './ResourceDisplay'
+import ScoreSheet from './ScoreSheet'
+import BuildBoard from './BuildBoard'
+import TurnNotification from './TurnNotification'
+import BuildAnimation from './BuildAnimation'
+import HelpModal from './HelpModal'
+import { getDiceResources, canBuild, getMissingResources, formatResourceName } from '../utils/resourceValidation'
+import { getAvailableResources } from '../utils/resourceConsumption'
+
+export default function GameTable({ onNavigate }) {
+  const { 
+    players, 
+    currentPlayerId, 
+    turnNumber, 
+    rollCount, 
+    maxRolls,
+    maxTurns,
+    dice, 
+    status,
+    builds,
+    rollDice, 
+    toggleLock,
+    performBuild,
+    endTurn 
+  } = useGameStore()
+
+  const [isRolling, setIsRolling] = useState(false)
+  const [showScoreSheet, setShowScoreSheet] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
+  const [showTurnNotification, setShowTurnNotification] = useState(false)
+  const [lastBuild, setLastBuild] = useState(null)
+  const [showBuildAnimation, setShowBuildAnimation] = useState(false)
+
+  const currentPlayer = players.find(p => p.id === currentPlayerId)
+  const canRoll = rollCount < maxRolls
+  const hasRolled = rollCount > 0
+  
+  // Get available resources from current dice (only unused dice)
+  const availableResources = getAvailableResources(dice)
+
+  useEffect(() => {
+    if (status === 'finished') {
+      onNavigate('results')
+    }
+  }, [status, onNavigate])
+
+  const handleRoll = () => {
+    if (!canRoll) return
+    setIsRolling(true)
+    rollDice()
+    setTimeout(() => setIsRolling(false), 500)
+  }
+
+  const handleEndTurn = () => {
+    endTurn()
+    setShowTurnNotification(true)
+  }
+
+  const handleBuild = (buildType, required) => {
+    // Check max limits
+    const maxLimits = {
+      roads: 15,
+      settlements: 5,
+      cities: 4,
+      knights: 14
+    }
+    
+    const currentCount = builds[buildType] || 0
+    const maxAllowed = maxLimits[buildType] || 999
+    
+    console.log(`[BUILD] ${buildType}: ${currentCount}/${maxAllowed}`)
+    
+    if (currentCount >= maxAllowed) {
+      console.log(`[BUILD] MAX REACHED for ${buildType}`)
+      return
+    }
+    
+    // Validate resources before building
+    if (!canBuild(required, availableResources)) {
+      console.log(`[BUILD] Insufficient resources for ${buildType}`)
+      return
+    }
+    
+    console.log(`[BUILD] Building ${buildType}`)
+    performBuild(buildType, required)
+    setLastBuild(buildType)
+    setShowBuildAnimation(true)
+  }
+
+  // Build requirements with resource icons and max limits
+  const buildActions = [
+    { 
+      type: 'roads', 
+      label: 'Road', 
+      resources: ['lumber', 'brick'],
+      color: 'cyber-blue',
+      borderColor: 'border-cyber-blue',
+      textColor: 'text-cyber-blue',
+      maxBuilds: 15  // Catan rule: max 15 roads
+    },
+    { 
+      type: 'settlements', 
+      label: 'Settlement', 
+      resources: ['lumber', 'brick', 'wheat', 'wool'],
+      color: 'cyber-green',
+      borderColor: 'border-cyber-green',
+      textColor: 'text-cyber-green',
+      maxBuilds: 5   // Catan rule: max 5 settlements
+    },
+    { 
+      type: 'cities', 
+      label: 'City', 
+      resources: ['ore', 'ore', 'ore', 'wheat', 'wheat'],
+      color: 'cyber-purple',
+      borderColor: 'border-cyber-purple',
+      textColor: 'text-cyber-purple',
+      maxBuilds: 4   // Catan rule: max 4 cities
+    },
+    { 
+      type: 'knights', 
+      label: 'Knight', 
+      resources: ['ore', 'wool', 'wheat'],
+      color: 'cyber-pink',
+      borderColor: 'border-cyber-pink',
+      textColor: 'text-cyber-pink',
+      maxBuilds: 14  // Catan rule: max 14 knights
+    },
+  ]
+
+  return (
+    <div className="min-h-screen p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* HUD */}
+        <div className="mb-6 bg-cyber-darker border-2 border-cyber-blue p-4 rounded-lg">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <div className="text-xs text-cyber-pink font-mono mb-1">CURRENT PLAYER</div>
+              <div className="text-lg font-bold text-cyber-blue">{currentPlayer?.name}</div>
+            </div>
+            <div>
+              <div className="text-xs text-cyber-pink font-mono mb-1">TURN</div>
+              <div className="text-lg font-bold text-cyber-green">{turnNumber} / {maxTurns}</div>
+            </div>
+            <div>
+              <div className="text-xs text-cyber-pink font-mono mb-1">ROLLS</div>
+              <div className="text-lg font-bold text-cyber-purple">{rollCount} / {maxRolls}</div>
+            </div>
+            <div>
+              <div className="text-xs text-cyber-pink font-mono mb-1">SCORE</div>
+              <div className="text-lg font-bold text-cyber-pink">{currentPlayer?.score}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left: Dice Area & Build Board */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Dice */}
+            <div className="bg-cyber-darker border-2 border-cyber-blue p-6 rounded-lg">
+              <h3 className="text-xl font-bold text-cyber-blue mb-4 font-mono">[DICE]</h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-6">
+                {dice.map((die, index) => (
+                  <Dice
+                    key={index}
+                    value={die.value}
+                    locked={die.locked}
+                    used={die.used}
+                    onToggleLock={() => hasRolled && !die.used && toggleLock(index)}
+                    isRolling={isRolling}
+                  />
+                ))}
+              </div>
+              
+              {/* Resource Summary */}
+              {hasRolled && (
+                <div className="mb-4 p-3 bg-cyber-blue/5 border border-cyber-blue/30 rounded">
+                  <div className="text-xs text-cyber-blue font-mono mb-2 text-center">
+                    YOUR RESOURCES
+                  </div>
+                  <ResourceDisplay dice={dice} />
+                </div>
+              )}
+              
+              <button
+                onClick={handleRoll}
+                disabled={!canRoll}
+                className={`neon-btn w-full ${
+                  canRoll
+                    ? 'text-cyber-blue border-cyber-blue'
+                    : 'text-gray-600 border-gray-600 opacity-50 cursor-not-allowed'
+                }`}
+              >
+                {rollCount === 0 ? 'ROLL DICE' : canRoll ? `RE-ROLL (${maxRolls - rollCount} left)` : 'NO ROLLS LEFT'}
+              </button>
+            </div>
+
+            {/* Build Actions */}
+            <div className="bg-cyber-darker border-2 border-cyber-green p-6 rounded-lg">
+              <h3 className="text-xl font-bold text-cyber-green mb-4 font-mono">[BUILD ACTIONS]</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {buildActions.map(action => {
+                  const currentBuilds = builds[action.type] || 0
+                  const isAtMax = currentBuilds >= action.maxBuilds
+                  const canAfford = hasRolled && canBuild(action.resources, availableResources) && !isAtMax
+                  const missingResources = hasRolled ? getMissingResources(action.resources, availableResources) : []
+                  
+                  return (
+                    <button
+                      key={action.type}
+                      onClick={() => handleBuild(action.type, action.resources)}
+                      disabled={!canAfford}
+                      className={`border-2 p-4 rounded transition-all text-left ${
+                        canAfford
+                          ? `${action.borderColor} ${action.textColor} hover:bg-${action.color}/10 hover:scale-105`
+                          : 'border-gray-600 text-gray-600 opacity-50 cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-bold text-lg">{action.label}</div>
+                        {canAfford && !isAtMax && (
+                          <span className="text-cyber-green text-xs font-mono">✓ CAN BUILD</span>
+                        )}
+                        {isAtMax && (
+                          <span className="text-cyber-pink text-xs font-mono">MAX REACHED</span>
+                        )}
+                      </div>
+                      
+                      {/* Resource icons */}
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {action.resources.map((resource, idx) => (
+                          <div key={idx} className={canAfford ? "opacity-100" : "opacity-40"}>
+                            <ResourceIcon resource={resource} size="sm" />
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-xs font-mono">
+                        <span className={currentBuilds >= action.maxBuilds ? "text-cyber-pink" : "opacity-70"}>
+                          Built: {currentBuilds}/{action.maxBuilds}
+                        </span>
+                        {missingResources.length > 0 && hasRolled && !isAtMax && (
+                          <span className="text-cyber-pink text-xs">
+                            Need: {missingResources.map(formatResourceName).join(', ')}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Build Progress Board */}
+            <BuildBoard builds={builds} playerName={currentPlayer?.name} />
+          </div>
+
+          {/* Right: Player List & Controls */}
+          <div className="space-y-6">
+            {/* Player List */}
+            <div className="bg-cyber-darker border-2 border-cyber-pink p-6 rounded-lg">
+              <h3 className="text-xl font-bold text-cyber-pink mb-4 font-mono">[PLAYERS]</h3>
+              <div className="space-y-3">
+                {players.map(player => (
+                  <div
+                    key={player.id}
+                    className={`p-3 border-2 rounded transition-all ${
+                      player.id === currentPlayerId
+                        ? 'border-cyber-green bg-cyber-green/10 shadow-[0_0_10px_rgba(57,255,20,0.3)]'
+                        : 'border-cyber-blue/30'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-bold text-cyber-blue">{player.name}</div>
+                        <div className="text-xs text-cyber-pink font-mono mt-1">
+                          Turns: {player.turnsCompleted}/{maxTurns}
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-cyber-green">
+                        {player.score}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="space-y-3">
+              <button
+                onClick={() => setShowHelp(true)}
+                className="neon-btn text-cyber-blue border-cyber-blue w-full text-sm"
+              >
+                📖 HELP / RULES
+              </button>
+
+              <button
+                onClick={() => setShowScoreSheet(!showScoreSheet)}
+                className="neon-btn text-cyber-purple border-cyber-purple w-full"
+              >
+                {showScoreSheet ? 'HIDE' : 'SHOW'} SCORE SHEET
+              </button>
+              
+              <button
+                onClick={handleEndTurn}
+                disabled={!hasRolled}
+                className={`neon-btn w-full ${
+                  hasRolled
+                    ? 'text-cyber-green border-cyber-green'
+                    : 'text-gray-600 border-gray-600 opacity-50 cursor-not-allowed'
+                }`}
+              >
+                END TURN
+              </button>
+
+              <button
+                onClick={() => onNavigate('landing')}
+                className="neon-btn text-cyber-pink border-cyber-pink w-full text-sm"
+              >
+                QUIT GAME
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Score Sheet Modal */}
+        {showScoreSheet && (
+          <ScoreSheet 
+            players={players}
+            currentPlayerId={currentPlayerId}
+            onClose={() => setShowScoreSheet(false)}
+          />
+        )}
+
+        {/* Help Modal */}
+        {showHelp && (
+          <HelpModal onClose={() => setShowHelp(false)} />
+        )}
+
+        {/* Turn Notification */}
+        <TurnNotification 
+          playerName={currentPlayer?.name}
+          show={showTurnNotification}
+          onComplete={() => setShowTurnNotification(false)}
+        />
+
+        {/* Build Animation */}
+        <BuildAnimation 
+          buildType={lastBuild}
+          show={showBuildAnimation}
+          onComplete={() => setShowBuildAnimation(false)}
+        />
+      </div>
+    </div>
+  )
+}
