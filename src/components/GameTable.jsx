@@ -37,6 +37,7 @@ export default function GameTable({ onNavigate }) {
   const [lastBuild, setLastBuild] = useState(null)
   const [showBuildAnimation, setShowBuildAnimation] = useState(false)
   const [bonusAchievement, setBonusAchievement] = useState(null) // { type: 'longestRoad' | 'largestArmy', playerName: string }
+  const [showQuitModal, setShowQuitModal] = useState(false)
   
   // Track bonus changes to show achievement notification
   const prevLongestRoadHolder = useRef(longestRoadHolder)
@@ -413,7 +414,7 @@ export default function GameTable({ onNavigate }) {
               </button>
 
               <button
-                onClick={() => onNavigate('landing')}
+                onClick={() => setShowQuitModal(true)}
                 className="neon-btn text-cyber-pink border-cyber-pink w-full text-sm"
               >
                 QUIT GAME
@@ -477,6 +478,34 @@ export default function GameTable({ onNavigate }) {
                 <div className="text-4xl font-bold text-cyber-green mt-3 animate-pulse">
                   +2 VP
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quit Confirmation Modal */}
+        {showQuitModal && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-cyber-darker border-4 border-cyber-pink p-8 max-w-md w-full">
+              <h2 className="text-2xl font-bold text-cyber-pink mb-4 font-mono text-center">
+                [QUIT GAME?]
+              </h2>
+              <p className="text-cyber-blue font-mono text-center mb-6">
+                Are you sure you want to quit? Your progress will be lost.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowQuitModal(false)}
+                  className="neon-btn text-cyber-blue border-cyber-blue flex-1"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => onNavigate('landing')}
+                  className="neon-btn text-cyber-pink border-cyber-pink flex-1"
+                >
+                  Quit Game
+                </button>
               </div>
             </div>
           </div>
