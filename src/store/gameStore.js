@@ -73,7 +73,9 @@ const useGameStore = create((set) => ({
       knights: 14
     }
     
-    const currentCount = state.builds[buildType] || 0
+    // Get CURRENT PLAYER's individual build count
+    const currentPlayer = state.players.find(p => p.id === state.currentPlayerId)
+    const currentCount = currentPlayer[buildType] || 0
     const maxAllowed = maxLimits[buildType] || 999
     
     console.log(`[STORE] Attempting to build ${buildType}: current=${currentCount}, max=${maxAllowed}`)
@@ -84,9 +86,12 @@ const useGameStore = create((set) => ({
       return state // No change if at max
     }
     
+    // Calculate new build counts for CURRENT PLAYER only
     const newBuilds = {
-      ...state.builds,
-      [buildType]: currentCount + 1
+      roads: buildType === 'roads' ? currentCount + 1 : (currentPlayer.roads || 0),
+      settlements: buildType === 'settlements' ? currentCount + 1 : (currentPlayer.settlements || 0),
+      cities: buildType === 'cities' ? currentCount + 1 : (currentPlayer.cities || 0),
+      knights: buildType === 'knights' ? currentCount + 1 : (currentPlayer.knights || 0)
     }
     
     // Consume resources (mark dice as used)
@@ -176,7 +181,6 @@ const useGameStore = create((set) => ({
     }
     
     return {
-      builds: newBuilds,
       players: updatedPlayers,
       dice: updatedDice,
       hasBuilt: true, // Mark that player has built (can't roll anymore)

@@ -22,7 +22,6 @@ export default function GameTable({ onNavigate }) {
   const victoryPointGoal = store.victoryPointGoal || 10
   const dice = store.dice || []
   const status = store.status || 'in_progress'
-  const builds = store.builds || {}
   const hasBuilt = store.hasBuilt || false
   const rollDice = store.rollDice
   const toggleLock = store.toggleLock
