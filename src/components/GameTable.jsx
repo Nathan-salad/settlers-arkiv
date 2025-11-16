@@ -22,6 +22,7 @@ export default function GameTable({ onNavigate }) {
     dice, 
     status,
     builds,
+    hasBuilt,
     rollDice, 
     toggleLock,
     performBuild,
@@ -36,7 +37,7 @@ export default function GameTable({ onNavigate }) {
   const [showBuildAnimation, setShowBuildAnimation] = useState(false)
 
   const currentPlayer = players.find(p => p.id === currentPlayerId)
-  const canRoll = rollCount < maxRolls
+  const canRoll = rollCount < maxRolls && !hasBuilt // Can't roll after building
   const hasRolled = rollCount > 0
   
   // Get available resources from current dice (only unused dice)
@@ -194,7 +195,13 @@ export default function GameTable({ onNavigate }) {
                     : 'text-gray-600 border-gray-600 opacity-50 cursor-not-allowed'
                 }`}
               >
-                {rollCount === 0 ? 'ROLL DICE' : canRoll ? `RE-ROLL (${maxRolls - rollCount} left)` : 'NO ROLLS LEFT'}
+                {hasBuilt 
+                  ? 'BUILT - END TURN' 
+                  : rollCount === 0 
+                  ? 'ROLL DICE' 
+                  : canRoll 
+                  ? `RE-ROLL (${maxRolls - rollCount} left)` 
+                  : 'NO ROLLS LEFT'}
               </button>
             </div>
 
@@ -205,7 +212,7 @@ export default function GameTable({ onNavigate }) {
                 {buildActions.map(action => {
                   const currentBuilds = builds[action.type] || 0
                   const isAtMax = currentBuilds >= action.maxBuilds
-                  const canAfford = hasRolled && canBuild(action.resources, availableResources) && !isAtMax
+                  const canAfford = hasRolled && !hasBuilt && canBuild(action.resources, availableResources) && !isAtMax
                   const missingResources = hasRolled ? getMissingResources(action.resources, availableResources) : []
                   
                   return (
@@ -221,11 +228,14 @@ export default function GameTable({ onNavigate }) {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div className="font-bold text-lg">{action.label}</div>
-                        {canAfford && !isAtMax && (
+                        {canAfford && !isAtMax && !hasBuilt && (
                           <span className="text-cyber-green text-xs font-mono">✓ CAN BUILD</span>
                         )}
                         {isAtMax && (
                           <span className="text-cyber-pink text-xs font-mono">MAX REACHED</span>
+                        )}
+                        {hasBuilt && (
+                          <span className="text-cyber-pink text-xs font-mono">ALREADY BUILT</span>
                         )}
                       </div>
                       
@@ -310,11 +320,13 @@ export default function GameTable({ onNavigate }) {
                 disabled={!hasRolled}
                 className={`neon-btn w-full ${
                   hasRolled
-                    ? 'text-cyber-green border-cyber-green'
+                    ? hasBuilt 
+                      ? 'text-cyber-green border-cyber-green pulse-green'
+                      : 'text-cyber-green border-cyber-green'
                     : 'text-gray-600 border-gray-600 opacity-50 cursor-not-allowed'
                 }`}
               >
-                END TURN
+                {hasBuilt ? '✓ END TURN (REQUIRED)' : 'END TURN'}
               </button>
 
               <button

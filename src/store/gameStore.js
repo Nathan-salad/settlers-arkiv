@@ -23,6 +23,7 @@ const useGameStore = create((set) => ({
     { value: 5, locked: false, used: false },
     { value: 6, locked: false, used: false },
   ],
+  hasBuilt: false, // Track if player has built this turn
   status: 'in_progress', // 'lobby' | 'in_progress' | 'finished'
   
   // Build state (tracks what's been built)
@@ -35,6 +36,12 @@ const useGameStore = create((set) => ({
 
   // Actions
   rollDice: () => set((state) => {
+    // Can't roll if already built this turn
+    if (state.hasBuilt) {
+      console.log('[STORE] Cannot roll - already built this turn')
+      return state
+    }
+    
     if (state.rollCount >= state.maxRolls) return state
     
     const newDice = state.dice.map(die => 
@@ -100,12 +107,13 @@ const useGameStore = create((set) => ({
         : player
     )
     
-    console.log(`[STORE] Build complete, resources consumed, dice updated`)
+    console.log(`[STORE] Build complete, resources consumed, dice updated, turn ending`)
     
     return {
       builds: newBuilds,
       players: updatedPlayers,
-      dice: updatedDice
+      dice: updatedDice,
+      hasBuilt: true // Mark that player has built this turn
     }
   }),
 
@@ -129,6 +137,7 @@ const useGameStore = create((set) => ({
       currentPlayerId: state.players[nextPlayerIndex].id,
       turnNumber: newTurnNumber,
       rollCount: 0,
+      hasBuilt: false, // Reset for next turn
       dice: state.dice.map(die => ({ ...die, locked: false, used: false })),
       status: gameFinished ? 'finished' : 'in_progress',
       // Reset builds for next player (or keep cumulative - your choice)
@@ -139,6 +148,7 @@ const useGameStore = create((set) => ({
   resetGame: () => set({
     turnNumber: 1,
     rollCount: 0,
+    hasBuilt: false,
     currentPlayerId: '1',
     dice: [
       { value: 1, locked: false, used: false },
