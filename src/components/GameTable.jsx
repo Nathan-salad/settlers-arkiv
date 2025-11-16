@@ -86,6 +86,11 @@ export default function GameTable({ onNavigate }) {
     setTimeout(() => setIsRolling(false), 500)
   }
 
+  const handleEndTurn = () => {
+    endTurn()
+    setShowTurnNotification(true)
+  }
+
   // Keyboard shortcuts: 'r' for roll, 'e' for end turn
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -102,12 +107,7 @@ export default function GameTable({ onNavigate }) {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [canRoll, hasRolled, handleRoll, handleEndTurn])
-
-  const handleEndTurn = () => {
-    endTurn()
-    setShowTurnNotification(true)
-  }
+  }, [canRoll, hasRolled])
 
   const handleBuild = (buildType, required) => {
     // Check max limits
