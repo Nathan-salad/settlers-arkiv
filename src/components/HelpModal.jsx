@@ -28,7 +28,7 @@ export default function HelpModal({ onClose }) {
               [OBJECTIVE]
             </h3>
             <p className="text-gray-300 leading-relaxed mb-3">
-              <strong className="text-cyber-pink">Island Two Rules:</strong> Be the first player to reach <strong className="text-cyber-green">10 Victory Points</strong> by building roads, settlements, cities, and knights!
+              Be the first player to reach <strong className="text-cyber-green">10 Victory Points</strong> by building roads, settlements, cities, and knights!
             </p>
           </section>
 
