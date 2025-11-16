@@ -83,13 +83,16 @@ export default function ResourceIcon({ resource, size = 'md' }) {
       color: 'text-yellow-300',
       bgColor: 'bg-yellow-300/20',
       icon: (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-          {/* Pixelated gold/wildcard */}
-          <polygon points="12,2 15,8 22,9 17,14 18,21 12,17 6,21 7,14 2,9 9,8" />
-        </svg>
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+        {/* Pixelated gold bars */}
+        <rect x="8" y="6" width="8" height="6" />
+        <rect x="3" y="14" width="8" height="6" />
+        <rect x="13" y="14" width="8" height="6" />
+      </svg>
       )
     }
   }
+
 
   const resourceData = resources[resource] || resources.gold
 
