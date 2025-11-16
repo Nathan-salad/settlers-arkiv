@@ -39,7 +39,7 @@ export function getDiceResources(dice) {
 
 /**
  * Check if player can build with current dice
- * Gold dice can be used as any resource
+ * Gold dice: 2 gold = 1 resource (official Catan rule)
  * @param {Array<string>} required - Required resources for build
  * @param {Object} available - Available resources from dice
  * @returns {boolean}
@@ -52,32 +52,32 @@ export function canBuild(required, available) {
     needed[resource] = (needed[resource] || 0) + 1
   })
 
-  // Check if we have enough of each resource (gold can substitute)
+  // Check if we have enough of each resource
+  // 2 gold can substitute for 1 of any resource
   let goldAvailable = available.gold || 0
+  let totalShortage = 0
 
   for (const [resource, count] of Object.entries(needed)) {
     const have = available[resource] || 0
     const shortage = count - have
 
     if (shortage > 0) {
-      // Try to use gold as substitute
-      if (shortage <= goldAvailable) {
-        goldAvailable -= shortage
-      } else {
-        // Not enough resources
-        return false
-      }
+      totalShortage += shortage
     }
   }
 
-  return true
+  // Each shortage needs 2 gold to substitute
+  const goldNeeded = totalShortage * 2
+  
+  return goldNeeded <= goldAvailable
 }
 
 /**
  * Get missing resources for a build
+ * Takes into account 2 gold = 1 resource rule
  * @param {Array<string>} required
  * @param {Object} available
- * @returns {Array<string>} List of missing resource names
+ * @returns {Array<string>} List of missing resource names or gold pairs needed
  */
 export function getMissingResources(required, available) {
   const needed = {}
@@ -88,20 +88,36 @@ export function getMissingResources(required, available) {
 
   const missing = []
   let goldAvailable = available.gold || 0
+  const goldPairs = Math.floor(goldAvailable / 2) // How many trades we can make
 
   for (const [resource, count] of Object.entries(needed)) {
     const have = available[resource] || 0
-    const shortage = count - have
+    let shortage = count - have
 
     if (shortage > 0) {
-      if (shortage <= goldAvailable) {
-        goldAvailable -= shortage
-      } else {
-        // Add missing resources
-        for (let i = 0; i < (shortage - goldAvailable); i++) {
+      // Try to cover with gold trades (2 gold = 1 resource)
+      const canCoverWithGold = Math.min(shortage, goldPairs)
+      shortage -= canCoverWithGold
+      
+      // Still short after using gold
+      if (shortage > 0) {
+        for (let i = 0; i < shortage; i++) {
           missing.push(resource)
         }
       }
+    }
+  }
+
+  // Check if we need more gold pairs
+  const totalShortage = Object.entries(needed).reduce((sum, [resource, count]) => {
+    const have = available[resource] || 0
+    return sum + Math.max(0, count - have)
+  }, 0)
+  
+  const goldPairsNeeded = totalShortage - goldPairs
+  if (goldPairsNeeded > 0) {
+    for (let i = 0; i < goldPairsNeeded; i++) {
+      missing.push('2 Gold')
     }
   }
 

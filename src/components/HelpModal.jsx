@@ -158,7 +158,11 @@ export default function HelpModal({ onClose }) {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>
-                <span>Gold dice can be used as any resource</span>
+                <span>2 Gold dice can be traded for 1 resource of your choice</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-cyber-green">▸</span>
+                <span>1 Gold die alone cannot be used (need pairs)</span>
               </li>
             </ul>
           </section>

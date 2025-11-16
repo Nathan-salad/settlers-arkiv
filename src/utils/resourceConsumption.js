@@ -20,7 +20,7 @@ export function consumeResources(dice, required) {
   })
 
   const updatedDice = [...dice]
-  let goldUsed = 0
+  let shortages = []
 
   // First pass: use exact matches
   for (const [resource, count] of Object.entries(needed)) {
@@ -38,15 +38,18 @@ export function consumeResources(dice, required) {
     // Track shortfall for gold substitution
     const shortage = count - found
     if (shortage > 0) {
-      goldUsed += shortage
+      shortages.push(shortage)
     }
   }
 
-  // Second pass: use gold dice for any shortfall
-  if (goldUsed > 0) {
+  // Second pass: use gold dice for shortfalls (2 gold = 1 resource)
+  const totalShortage = shortages.reduce((sum, s) => sum + s, 0)
+  const goldNeeded = totalShortage * 2 // Need 2 gold per shortage
+  
+  if (goldNeeded > 0) {
     let goldConsumed = 0
     
-    for (let i = 0; i < updatedDice.length && goldConsumed < goldUsed; i++) {
+    for (let i = 0; i < updatedDice.length && goldConsumed < goldNeeded; i++) {
       const diceResource = diceToResource[updatedDice[i].value]
       
       if (!updatedDice[i].used && diceResource === 'gold') {
