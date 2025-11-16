@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import useGameStore from '../store/gameStore'
 
 export default function CreateJoinScreen({ onNavigate }) {
   const [tab, setTab] = useState('create') // 'create' | 'join'
   const [roomCode, setRoomCode] = useState('')
   const [playerName, setPlayerName] = useState('')
   const [generatedCode, setGeneratedCode] = useState(null)
+  
+  const { resetGame } = useGameStore()
 
   const handleCreateGame = () => {
     // TODO: Call backend API
@@ -12,9 +15,17 @@ export default function CreateJoinScreen({ onNavigate }) {
     setGeneratedCode(code)
   }
 
+  const handleStartGame = () => {
+    // Reset game state before starting
+    resetGame()
+    onNavigate('game')
+  }
+
   const handleJoinGame = () => {
     // TODO: Call backend API
     if (roomCode.trim()) {
+      // Reset game state before joining
+      resetGame()
       onNavigate('game')
     }
   }
@@ -93,7 +104,7 @@ export default function CreateJoinScreen({ onNavigate }) {
                   </button>
                 </div>
                 <button
-                  onClick={() => onNavigate('game')}
+                  onClick={handleStartGame}
                   className="neon-btn text-cyber-green border-cyber-green w-full mt-6"
                 >
                   Start Game
