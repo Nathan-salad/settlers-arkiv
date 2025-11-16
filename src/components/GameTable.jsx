@@ -374,13 +374,6 @@ export default function GameTable({ onNavigate }) {
             {/* Controls */}
             <div className="space-y-3">
               <button
-                onClick={() => setShowHelp(true)}
-                className="neon-btn text-cyber-blue border-cyber-blue w-full text-sm"
-              >
-                📖 HELP / RULES
-              </button>
-
-              <button
                 onClick={() => setShowScoreSheet(!showScoreSheet)}
                 className="neon-btn text-cyber-purple border-cyber-purple w-full"
               >
@@ -406,6 +399,13 @@ export default function GameTable({ onNavigate }) {
                 className="neon-btn text-cyber-pink border-cyber-pink w-full text-sm"
               >
                 QUIT GAME
+              </button>
+
+              <button
+                onClick={() => setShowHelp(true)}
+                className="neon-btn text-cyber-blue border-cyber-blue w-full text-sm"
+              >
+                RULES
               </button>
             </div>
           </div>
