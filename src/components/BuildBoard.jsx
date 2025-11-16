@@ -5,6 +5,7 @@ import ResourceIcon from './ResourceIcon'
  * Lo-fi cyberpunk grid showing progress
  */
 export default function BuildBoard({ builds, playerName }) {
+  // Ordered: Roads, Knights, Settlements, Cities (matches build actions)
   const buildItems = [
     { 
       type: 'roads', 
@@ -12,6 +13,13 @@ export default function BuildBoard({ builds, playerName }) {
       icon: 'lumber',
       color: 'cyber-blue',
       max: 15  // Updated to match Catan rules
+    },
+    { 
+      type: 'knights', 
+      label: 'Knights', 
+      icon: 'wool',
+      color: 'cyber-pink',
+      max: 14  // Updated to match Catan rules
     },
     { 
       type: 'settlements', 
@@ -26,13 +34,6 @@ export default function BuildBoard({ builds, playerName }) {
       icon: 'ore',
       color: 'cyber-purple',
       max: 4 
-    },
-    { 
-      type: 'knights', 
-      label: 'Knights', 
-      icon: 'wool',
-      color: 'cyber-pink',
-      max: 14  // Updated to match Catan rules
     }
   ]
 
