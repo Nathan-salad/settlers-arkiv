@@ -11,6 +11,7 @@ export default function BuildBoard({ builds, playerName }) {
       type: 'roads', 
       label: 'Roads', 
       icon: 'lumber',
+      customIcon: '|:|', // Lo-fi road icon
       color: 'cyber-blue',
       max: 15  // Updated to match Catan rules
     },
@@ -18,6 +19,7 @@ export default function BuildBoard({ builds, playerName }) {
       type: 'knights', 
       label: 'Knights', 
       icon: 'wool',
+      customIcon: '⚔️', // Knight icon
       color: 'cyber-pink',
       max: 14  // Updated to match Catan rules
     },
@@ -25,6 +27,7 @@ export default function BuildBoard({ builds, playerName }) {
       type: 'settlements', 
       label: 'Settlements', 
       icon: 'wheat',
+      customIcon: '🏘️', // Settlement icon
       color: 'cyber-green',
       max: 5 
     },
@@ -32,6 +35,7 @@ export default function BuildBoard({ builds, playerName }) {
       type: 'cities', 
       label: 'Cities', 
       icon: 'ore',
+      customIcon: '🏙️', // City icon
       color: 'cyber-purple',
       max: 4 
     }
@@ -53,7 +57,11 @@ export default function BuildBoard({ builds, playerName }) {
               {/* Label & Count */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <ResourceIcon resource={item.icon} size="sm" />
+                  {item.customIcon ? (
+                    <span className={`text-${item.color} text-lg`}>{item.customIcon}</span>
+                  ) : (
+                    <ResourceIcon resource={item.icon} size="sm" />
+                  )}
                   <span className={`text-${item.color} font-mono text-sm font-bold`}>
                     {item.label}
                   </span>
