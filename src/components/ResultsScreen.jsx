@@ -109,7 +109,7 @@ export default function ResultsScreen({ onNavigate }) {
                         )}
                         {largestArmyHolder === player.id && (
                           <div className="inline-flex items-center gap-1 bg-cyber-pink/20 border border-cyber-pink text-cyber-pink px-2 py-0.5 rounded text-xs font-bold">
-                            <span>⚔️</span>
+                            <span>{'>'}X{'<'}</span>
                             <span>ARMY</span>
                           </div>
                         )}
@@ -135,7 +135,7 @@ export default function ResultsScreen({ onNavigate }) {
                   <div className="text-center">
                     <div className="text-xs text-cyber-pink/70 font-mono mb-1">Knights</div>
                     <div className="text-lg font-bold text-cyber-pink">
-                      ⚔️ {player.knights || 0}
+                      {'>'}X{'<'} {player.knights || 0}
                     </div>
                   </div>
                   <div className="text-center">
@@ -147,7 +147,7 @@ export default function ResultsScreen({ onNavigate }) {
                   <div className="text-center">
                     <div className="text-xs text-cyber-purple/70 font-mono mb-1">Cities</div>
                     <div className="text-lg font-bold text-cyber-purple">
-                      🏙️ {player.cities || 0}
+                      [#] {player.cities || 0}
                     </div>
                   </div>
                 </div>

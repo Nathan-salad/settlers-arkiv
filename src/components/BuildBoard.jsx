@@ -19,7 +19,7 @@ export default function BuildBoard({ builds, playerName }) {
       type: 'knights', 
       label: 'Knights', 
       icon: 'wool',
-      customIcon: '⚔️', // Knight icon
+      customIcon: '>X<', // Knight icon (lo-fi crossed swords)
       color: 'cyber-pink',
       max: 14  // Updated to match Catan rules
     },
@@ -35,7 +35,7 @@ export default function BuildBoard({ builds, playerName }) {
       type: 'cities', 
       label: 'Cities', 
       icon: 'ore',
-      customIcon: '🏙️', // City icon
+      customIcon: '[#]', // City icon (lo-fi building)
       color: 'cyber-purple',
       max: 4 
     }
