@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import saladLogo from './salad.svg'
 import arkivLogo from './arkiv.png'
+import HelpModal from './HelpModal'
 
 export default function LandingScreen({ onNavigate }) {
+  const [showHelp, setShowHelp] = useState(false)
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="text-center space-y-12">
@@ -36,8 +39,17 @@ export default function LandingScreen({ onNavigate }) {
           <p>&gt; 2-4 PLAYERS</p>
           <p>&gt; FIRST TO 10 VICTORY POINTS</p>
           <p>&gt; REAL-TIME MULTIPLAYER</p>
+          <button 
+            onClick={() => setShowHelp(true)}
+            className="text-cyber-blue hover:text-cyber-pink transition-colors underline text-sm mt-3"
+          >
+            &gt; VIEW RULES
+          </button>
         </div>
       </div>
+
+      {/* Help Modal */}
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
       {/* Decorative elements */}
       <div className="absolute top-4 left-4 text-cyber-purple text-xs font-mono opacity-50">
