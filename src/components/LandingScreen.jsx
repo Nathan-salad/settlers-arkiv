@@ -7,7 +7,7 @@ export default function LandingScreen({ onNavigate }) {
       <div className="text-center space-y-12">
         {/* Title */}
         <h1 className="text-6xl md:text-8xl font-bold glitch text-cyber-blue mb-8">
-          CATAN DICE
+          S3TTLΞ
         </h1>
         
         <p className="text-xl md:text-2xl text-cyber-pink font-mono tracking-wider">
