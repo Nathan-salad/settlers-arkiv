@@ -86,19 +86,23 @@ export default function GameTable({ onNavigate }) {
     setTimeout(() => setIsRolling(false), 500)
   }
 
-  // Keyboard shortcut: 'r' for roll
+  // Keyboard shortcuts: 'r' for roll, 'e' for end turn
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'r' || e.key === 'R') {
         if (canRoll) {
           handleRoll()
         }
+      } else if (e.key === 'e' || e.key === 'E') {
+        if (hasRolled) {
+          handleEndTurn()
+        }
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [canRoll, handleRoll])
+  }, [canRoll, hasRolled, handleRoll, handleEndTurn])
 
   const handleEndTurn = () => {
     endTurn()
