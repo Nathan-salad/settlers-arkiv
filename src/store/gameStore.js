@@ -225,13 +225,17 @@ const useGameStore = create((set) => ({
     }
   }),
 
-  resetGame: () => set({
-    players: [
-      { id: '1', name: 'Player 1', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
-      { id: '2', name: 'Player 2', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
-      { id: '3', name: 'Player 3', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
-      { id: '4', name: 'Player 4', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
-    ],
+  resetGame: (playerCount = 4, playerName = 'Player 1') => set({
+    players: Array.from({ length: playerCount }, (_, i) => ({
+      id: String(i + 1),
+      name: i === 0 ? playerName : `Player ${i + 1}`,
+      score: 0,
+      turnsCompleted: 0,
+      roads: 0,
+      settlements: 0,
+      cities: 0,
+      knights: 0
+    })),
     currentPlayerId: '1',
     turnNumber: 1,
     rollCount: 0,

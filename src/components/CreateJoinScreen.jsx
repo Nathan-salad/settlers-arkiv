@@ -17,16 +17,18 @@ export default function CreateJoinScreen({ onNavigate }) {
   }
 
   const handleStartGame = () => {
-    // Reset game state before starting with selected player count
-    resetGame(playerCount)
+    // Reset game state before starting with selected player count and host name
+    const hostName = playerName.trim() || 'Player 1'
+    resetGame(playerCount, hostName)
     onNavigate('game')
   }
 
   const handleJoinGame = () => {
-    // TODO: Call backend API
+    // TODO: Call backend API with player name
     if (roomCode.trim()) {
-      // Reset game state before joining
-      resetGame()
+      const joiningPlayerName = playerName.trim() || 'Player 2'
+      // Reset game state before joining (will be updated with networking)
+      resetGame(2, joiningPlayerName)
       onNavigate('game')
     }
   }
@@ -80,7 +82,19 @@ export default function CreateJoinScreen({ onNavigate }) {
           <div className="space-y-6 border-2 border-cyber-blue p-8">
             {!generatedCode ? (
               <>
-                <p className="text-cyber-blue text-center mb-6 font-mono">
+                <div className="space-y-4 mb-6">
+                  <label className="block text-cyber-blue font-mono text-sm">
+                    YOUR NAME
+                  </label>
+                  <input
+                    type="text"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    placeholder="Enter your name..."
+                    className="w-full bg-cyber-darker border-2 border-cyber-blue p-4 text-cyber-blue font-mono focus:outline-none focus:border-cyber-green placeholder-cyber-blue/30"
+                  />
+                </div>
+                <p className="text-cyber-blue text-center mb-6 font-mono text-sm">
                   Create a new game and share the room code with friends
                 </p>
                 <button
@@ -104,6 +118,9 @@ export default function CreateJoinScreen({ onNavigate }) {
                     [COPY TO CLIPBOARD]
                   </button>
                 </div>
+                <div className="text-center text-cyber-green font-mono text-sm my-4">
+                  Playing as: <span className="font-bold">{playerName || 'Player 1'}</span>
+                </div>
                 <button
                   onClick={handleStartGame}
                   className="neon-btn text-cyber-green border-cyber-green w-full mt-6"
@@ -120,7 +137,7 @@ export default function CreateJoinScreen({ onNavigate }) {
           <div className="space-y-6 border-2 border-cyber-pink p-8">
             <div className="space-y-4">
               <label className="block text-cyber-pink font-mono text-sm">
-                PLAYER NAME (OPTIONAL)
+                YOUR NAME
               </label>
               <input
                 type="text"
