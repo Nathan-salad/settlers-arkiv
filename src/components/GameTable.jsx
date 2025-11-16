@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import useGameStore from '../store/gameStore'
 import Dice from './Dice'
 import ResourceIcon from './ResourceIcon'
@@ -36,6 +36,33 @@ export default function GameTable({ onNavigate }) {
   const [showTurnNotification, setShowTurnNotification] = useState(false)
   const [lastBuild, setLastBuild] = useState(null)
   const [showBuildAnimation, setShowBuildAnimation] = useState(false)
+  const [bonusAchievement, setBonusAchievement] = useState(null) // { type: 'longestRoad' | 'largestArmy', playerName: string }
+  
+  // Track bonus changes to show achievement notification
+  const prevLongestRoadHolder = useRef(longestRoadHolder)
+  const prevLargestArmyHolder = useRef(largestArmyHolder)
+  
+  useEffect(() => {
+    // Check if Longest Road changed
+    if (longestRoadHolder && longestRoadHolder !== prevLongestRoadHolder.current) {
+      const player = players.find(p => p.id === longestRoadHolder)
+      if (player) {
+        setBonusAchievement({ type: 'longestRoad', playerName: player.name })
+        setTimeout(() => setBonusAchievement(null), 3000)
+      }
+    }
+    prevLongestRoadHolder.current = longestRoadHolder
+    
+    // Check if Largest Army changed
+    if (largestArmyHolder && largestArmyHolder !== prevLargestArmyHolder.current) {
+      const player = players.find(p => p.id === largestArmyHolder)
+      if (player) {
+        setBonusAchievement({ type: 'largestArmy', playerName: player.name })
+        setTimeout(() => setBonusAchievement(null), 3000)
+      }
+    }
+    prevLargestArmyHolder.current = largestArmyHolder
+  }, [longestRoadHolder, largestArmyHolder, players])
 
   const currentPlayer = players.find(p => p.id === currentPlayerId) || { name: 'Player 1', score: 0 }
   const canRoll = rollCount < maxRolls && !hasBuilt // Can't roll after building
@@ -409,6 +436,31 @@ export default function GameTable({ onNavigate }) {
           show={showBuildAnimation}
           onComplete={() => setShowBuildAnimation(false)}
         />
+        
+        {/* Bonus Achievement Notification */}
+        {bonusAchievement && (
+          <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
+            <div className="animate-bounce bg-gradient-to-r from-cyber-blue/90 to-cyber-purple/90 border-4 border-cyber-green p-8 rounded-lg shadow-[0_0_30px_rgba(57,255,20,0.5)]">
+              <div className="text-center">
+                <div className="text-5xl mb-4">
+                  {bonusAchievement.type === 'longestRoad' ? '🛣️' : '⚔️'}
+                </div>
+                <div className="text-3xl font-bold text-cyber-green mb-2 glitch">
+                  {bonusAchievement.type === 'longestRoad' ? 'LONGEST ROAD' : 'LARGEST ARMY'}
+                </div>
+                <div className="text-2xl text-cyber-blue font-bold mb-2">
+                  ACHIEVED!
+                </div>
+                <div className="text-xl text-cyber-pink font-mono">
+                  {bonusAchievement.playerName}
+                </div>
+                <div className="text-4xl font-bold text-cyber-green mt-3 animate-pulse">
+                  +2 VP
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
