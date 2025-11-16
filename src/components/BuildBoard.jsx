@@ -27,7 +27,7 @@ export default function BuildBoard({ builds, playerName }) {
       type: 'settlements', 
       label: 'Settlements', 
       icon: 'wheat',
-      customIcon: '🏘️', // Settlement icon
+      customIcon: '/^\\', // Settlement icon (lo-fi house)
       color: 'cyber-green',
       max: 5 
     },

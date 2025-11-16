@@ -141,7 +141,7 @@ export default function ResultsScreen({ onNavigate }) {
                   <div className="text-center">
                     <div className="text-xs text-cyber-green/70 font-mono mb-1">Settlements</div>
                     <div className="text-lg font-bold text-cyber-green">
-                      🏘️ {player.settlements || 0}
+                      /^\ {player.settlements || 0}
                     </div>
                   </div>
                   <div className="text-center">
