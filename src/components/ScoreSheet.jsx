@@ -204,7 +204,7 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
           {/* Legend */}
           <div className="mt-8 p-4 border-2 border-cyber-blue/30 rounded-lg">
             <h3 className="text-sm font-bold text-cyber-blue mb-3 font-mono">
-              [ISLAND TWO SCORING]
+              [SCORE RULES]
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-cyber-blue/70 font-mono">
               <div>
