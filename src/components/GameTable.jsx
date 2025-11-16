@@ -92,6 +92,7 @@ export default function GameTable({ onNavigate }) {
   }
 
   // Build requirements with resource icons and max limits
+  // Ordered: Roads, Knights (left) | Settlements, Cities (right)
   const buildActions = [
     { 
       type: 'roads', 
@@ -101,6 +102,15 @@ export default function GameTable({ onNavigate }) {
       borderColor: 'border-cyber-blue',
       textColor: 'text-cyber-blue',
       maxBuilds: 15  // Catan rule: max 15 roads
+    },
+    { 
+      type: 'knights', 
+      label: 'Knight', 
+      resources: ['ore', 'wool', 'wheat'],
+      color: 'cyber-pink',
+      borderColor: 'border-cyber-pink',
+      textColor: 'text-cyber-pink',
+      maxBuilds: 14  // Catan rule: max 14 knights
     },
     { 
       type: 'settlements', 
@@ -119,15 +129,6 @@ export default function GameTable({ onNavigate }) {
       borderColor: 'border-cyber-purple',
       textColor: 'text-cyber-purple',
       maxBuilds: 4   // Catan rule: max 4 cities
-    },
-    { 
-      type: 'knights', 
-      label: 'Knight', 
-      resources: ['ore', 'wool', 'wheat'],
-      color: 'cyber-pink',
-      borderColor: 'border-cyber-pink',
-      textColor: 'text-cyber-pink',
-      maxBuilds: 14  // Catan rule: max 14 knights
     },
   ]
 
