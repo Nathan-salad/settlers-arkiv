@@ -92,7 +92,7 @@ export default function GameTable({ onNavigate }) {
     setShowTurnNotification(true)
   }
 
-  // Keyboard shortcuts: 'r' for roll, 'e' for end turn
+  // Keyboard shortcuts: 'r' for roll, 'e' for end turn, '1-6' for dice
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'r' || e.key === 'R') {
@@ -103,12 +103,18 @@ export default function GameTable({ onNavigate }) {
         if (hasRolled) {
           handleEndTurn()
         }
+      } else if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        // Toggle lock for dice 1-6
+        const diceIndex = parseInt(e.key) - 1
+        if (hasRolled && dice[diceIndex] && !dice[diceIndex].used) {
+          toggleLock(diceIndex)
+        }
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [canRoll, hasRolled])
+  }, [canRoll, hasRolled, dice, toggleLock])
 
   const handleBuild = (buildType, required) => {
     // Check max limits
