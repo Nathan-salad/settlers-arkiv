@@ -1,3 +1,6 @@
+import saladLogo from './salad.svg'
+import arkivLogo from './arkiv.png'
+
 export default function LandingScreen({ onNavigate }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8">
@@ -43,6 +46,20 @@ export default function LandingScreen({ onNavigate }) {
       
       <div className="absolute bottom-4 right-4 text-cyber-green text-xs font-mono opacity-50">
         [STATUS: ONLINE]
+      </div>
+
+      {/* Logos - Bottom Right */}
+      <div className="absolute bottom-20 right-4 flex items-center gap-4">
+        <img 
+          src={saladLogo} 
+          alt="Salad" 
+          className="h-10 opacity-60 hover:opacity-100 transition-opacity"
+        />
+        <img 
+          src={arkivLogo} 
+          alt="Arkiv" 
+          className="h-10 opacity-60 hover:opacity-100 transition-opacity"
+        />
       </div>
     </div>
   )
