@@ -1,24 +1,16 @@
 import { useState } from 'react'
 import LandingScreen from './components/LandingScreen'
-import CreateJoinScreen from './components/CreateJoinScreen'
 import GameTable from './components/GameTable'
 import ResultsScreen from './components/ResultsScreen'
 
 function App() {
-  const [screen, setScreen] = useState('landing') // 'landing' | 'createjoin' | 'game' | 'results'
-  const [initialTab, setInitialTab] = useState('create') // 'create' | 'join'
-
-  const handleNavigate = (newScreen, tab) => {
-    setScreen(newScreen)
-    if (tab) setInitialTab(tab)
-  }
+  const [screen, setScreen] = useState('landing') // 'landing' | 'game' | 'results'
 
   return (
     <div className="min-h-screen cyber-grid">
-      {screen === 'landing' && <LandingScreen onNavigate={handleNavigate} />}
-      {screen === 'createjoin' && <CreateJoinScreen onNavigate={handleNavigate} initialTab={initialTab} />}
-      {screen === 'game' && <GameTable onNavigate={handleNavigate} />}
-      {screen === 'results' && <ResultsScreen onNavigate={handleNavigate} />}
+      {screen === 'landing' && <LandingScreen onNavigate={setScreen} />}
+      {screen === 'game' && <GameTable onNavigate={setScreen} />}
+      {screen === 'results' && <ResultsScreen onNavigate={setScreen} />}
     </div>
   )
 }
