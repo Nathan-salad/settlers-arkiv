@@ -89,6 +89,7 @@ export function getMissingResources(required, available) {
   const missing = []
   let goldAvailable = available.gold || 0
   const goldPairs = Math.floor(goldAvailable / 2) // How many trades we can make
+  let goldPairsUsed = 0
 
   for (const [resource, count] of Object.entries(needed)) {
     const have = available[resource] || 0
@@ -96,7 +97,8 @@ export function getMissingResources(required, available) {
 
     if (shortage > 0) {
       // Try to cover with gold trades (2 gold = 1 resource)
-      const canCoverWithGold = Math.min(shortage, goldPairs)
+      const canCoverWithGold = Math.min(shortage, goldPairs - goldPairsUsed)
+      goldPairsUsed += canCoverWithGold
       shortage -= canCoverWithGold
       
       // Still short after using gold
@@ -105,19 +107,6 @@ export function getMissingResources(required, available) {
           missing.push(resource)
         }
       }
-    }
-  }
-
-  // Check if we need more gold pairs
-  const totalShortage = Object.entries(needed).reduce((sum, [resource, count]) => {
-    const have = available[resource] || 0
-    return sum + Math.max(0, count - have)
-  }, 0)
-  
-  const goldPairsNeeded = totalShortage - goldPairs
-  if (goldPairsNeeded > 0) {
-    for (let i = 0; i < goldPairsNeeded; i++) {
-      missing.push('2 Gold')
     }
   }
 
