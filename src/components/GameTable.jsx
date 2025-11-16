@@ -224,7 +224,20 @@ export default function GameTable({ onNavigate }) {
                       }`}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div className="font-bold text-lg">{action.label}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-bold text-lg">{action.label}</div>
+                          {/* Victory Point Badge */}
+                          {action.type === 'settlements' && (
+                            <span className="bg-cyber-green/20 border border-cyber-green text-cyber-green px-2 py-0.5 rounded text-xs font-bold">
+                              +1 VP
+                            </span>
+                          )}
+                          {action.type === 'cities' && (
+                            <span className="bg-cyber-purple/20 border border-cyber-purple text-cyber-purple px-2 py-0.5 rounded text-xs font-bold">
+                              +2 VP
+                            </span>
+                          )}
+                        </div>
                         {canAfford && !isAtMax && (
                           <span className="text-cyber-green text-xs font-mono">✓ CAN BUILD</span>
                         )}
