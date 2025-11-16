@@ -338,7 +338,7 @@ export default function GameTable({ onNavigate }) {
                           {/* Longest Road Badge */}
                           {longestRoadHolder === player.id && (
                             <div className="inline-flex items-center gap-1 bg-cyber-blue/20 border border-cyber-blue text-cyber-blue px-2 py-0.5 rounded text-xs font-bold animate-pulse">
-                              <span>🛣️</span>
+                              <span>══</span>
                               <span>LONGEST</span>
                             </div>
                           )}
@@ -355,7 +355,7 @@ export default function GameTable({ onNavigate }) {
                         </div>
                         <div className="text-xs text-cyber-blue/70 font-mono mt-1 flex gap-3">
                           <span title="Roads (5+ for Longest Road bonus)">
-                            🛣️ {player.roads || 0}
+                            ══ {player.roads || 0}
                           </span>
                           <span title="Knights (3+ for Largest Army bonus)">
                             ⚔️ {player.knights || 0}
@@ -445,7 +445,7 @@ export default function GameTable({ onNavigate }) {
             <div className="animate-bounce bg-gradient-to-r from-cyber-blue/90 to-cyber-purple/90 border-4 border-cyber-green p-8 rounded-lg shadow-[0_0_30px_rgba(57,255,20,0.5)]">
               <div className="text-center">
                 <div className="text-5xl mb-4">
-                  {bonusAchievement.type === 'longestRoad' ? '🛣️' : '⚔️'}
+                  {bonusAchievement.type === 'longestRoad' ? '══' : '⚔️'}
                 </div>
                 <div className="text-3xl font-bold text-cyber-green mb-2 glitch">
                   {bonusAchievement.type === 'longestRoad' ? 'LONGEST ROAD' : 'LARGEST ARMY'}

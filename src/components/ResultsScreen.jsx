@@ -103,7 +103,7 @@ export default function ResultsScreen({ onNavigate }) {
                         {/* Badges */}
                         {longestRoadHolder === player.id && (
                           <div className="inline-flex items-center gap-1 bg-cyber-blue/20 border border-cyber-blue text-cyber-blue px-2 py-0.5 rounded text-xs font-bold">
-                            <span>🛣️</span>
+                            <span>══</span>
                             <span>LONGEST</span>
                           </div>
                         )}
@@ -129,7 +129,7 @@ export default function ResultsScreen({ onNavigate }) {
                   <div className="text-center">
                     <div className="text-xs text-cyber-blue/70 font-mono mb-1">Roads</div>
                     <div className="text-lg font-bold text-cyber-blue">
-                      🛣️ {player.roads || 0}
+                      ══ {player.roads || 0}
                     </div>
                   </div>
                   <div className="text-center">
