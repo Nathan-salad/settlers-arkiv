@@ -1,9 +1,12 @@
 import { create } from 'zustand'
 import { consumeResources } from '../utils/resourceConsumption'
+import { rollDice as rollDiceAPI, endTurn as endTurnAPI } from '../api/apiClient'
 
-const useGameStore = create((set) => ({
+const useGameStore = create((set, get) => ({
   // Game state
+  gameId: '',
   roomCode: '',
+  localPlayerId: '1', // ID of the player on this device
   players: [
     { id: '1', name: 'Player 1', score: 0, turnsCompleted: 0 },
     { id: '2', name: 'Player 2', score: 0, turnsCompleted: 0 },
@@ -39,24 +42,80 @@ const useGameStore = create((set) => ({
   largestArmyHolder: null, // Player ID who has Largest Army (3+ knights, 2 VP)
 
   // Actions
-  rollDice: () => set((state) => {
+  rollDice: async () => {
+    const state = get()
+    
     // Can't roll if already built this turn
     if (state.hasBuilt) {
       console.log('[STORE] Cannot roll - already built this turn')
-      return state
+      return
     }
     
-    if (state.rollCount >= state.maxRolls) return state
+    if (state.rollCount >= state.maxRolls) return
     
-    const newDice = state.dice.map(die => 
-      die.locked ? die : { ...die, value: Math.floor(Math.random() * 6) + 1, used: false }
-    )
-    
-    return {
-      dice: newDice,
-      rollCount: state.rollCount + 1
+    // If no gameId, fall back to local random dice
+    if (!state.gameId) {
+      const newDice = state.dice.map(die => 
+        die.locked ? die : { ...die, value: Math.floor(Math.random() * 6) + 1, used: false }
+      )
+      
+      set({
+        dice: newDice,
+        rollCount: state.rollCount + 1
+      })
+      return
     }
-  }),
+    
+    try {
+      // Get held dice values (locked dice)
+      const heldDice = state.dice
+        .filter(die => die.locked)
+        .map(die => die.value)
+      
+      // Call API to roll dice
+      const gameState = await rollDiceAPI(state.gameId, heldDice)
+      
+      // Extract dice from currentTurn based on roll number
+      let diceRolled = []
+      let diceHeld = []
+      
+      if (gameState.currentTurn?.thirdRoll) {
+        diceRolled = gameState.currentTurn.thirdRoll.diceRolled || []
+        diceHeld = gameState.currentTurn.thirdRoll.diceHeld || []
+      } else if (gameState.currentTurn?.secondRoll) {
+        diceRolled = gameState.currentTurn.secondRoll.diceRolled || []
+        diceHeld = gameState.currentTurn.secondRoll.diceHeld || []
+      } else if (gameState.currentTurn?.firstRoll) {
+        diceRolled = gameState.currentTurn.firstRoll.diceRolled || []
+      }
+      
+      // Combine held and rolled dice
+      const allDiceValues = [...diceHeld, ...diceRolled]
+      
+      // Update dice state, preserving locked status
+      const newDice = allDiceValues.map((value, index) => ({
+        value,
+        locked: index < diceHeld.length, // First N dice are locked (held)
+        used: false
+      }))
+      
+      set({
+        dice: newDice,
+        rollCount: state.rollCount + 1
+      })
+    } catch (error) {
+      console.error('[STORE] Error rolling dice:', error)
+      // Fall back to local random on error
+      const newDice = state.dice.map(die => 
+        die.locked ? die : { ...die, value: Math.floor(Math.random() * 6) + 1, used: false }
+      )
+      
+      set({
+        dice: newDice,
+        rollCount: state.rollCount + 1
+      })
+    }
+  },
 
   toggleLock: (index) => set((state) => ({
     dice: state.dice.map((die, i) => 
@@ -190,52 +249,90 @@ const useGameStore = create((set) => ({
     }
   }),
 
-  endTurn: () => set((state) => {
-    const currentPlayerIndex = state.players.findIndex(p => p.id === state.currentPlayerId)
-    const nextPlayerIndex = (currentPlayerIndex + 1) % state.players.length
-    const isLastPlayer = nextPlayerIndex === 0
+  endTurn: async () => {
+    const state = get()
     
-    // Update current player's turns completed
-    const updatedPlayers = state.players.map((player, idx) =>
-      idx === currentPlayerIndex
-        ? { ...player, turnsCompleted: player.turnsCompleted + 1 }
-        : player
-    )
-    
-    const newTurnNumber = isLastPlayer ? state.turnNumber + 1 : state.turnNumber
-    
-    // Check for winner (Island Two: First to 10 VP)
-    const winner = updatedPlayers.find(p => p.score >= state.victoryPointGoal)
-    const gameFinished = winner !== undefined
-    
-    if (gameFinished) {
-      console.log(`[STORE] GAME OVER at end of turn! ${winner.name} wins with ${winner.score} points!`)
-    }
+    // If no gameId, use local state only
+    if (!state.gameId) {
+      const currentPlayerIndex = state.players.findIndex(p => p.id === state.currentPlayerId)
+      const nextPlayerIndex = (currentPlayerIndex + 1) % state.players.length
+      const isLastPlayer = nextPlayerIndex === 0
+      
+      // Update current player's turns completed
+      const updatedPlayers = state.players.map((player, idx) =>
+        idx === currentPlayerIndex
+          ? { ...player, turnsCompleted: player.turnsCompleted + 1 }
+          : player
+      )
+      
+      const newTurnNumber = isLastPlayer ? state.turnNumber + 1 : state.turnNumber
+      
+      // Check for winner (Island Two: First to 10 VP)
+      const winner = updatedPlayers.find(p => p.score >= state.victoryPointGoal)
+      const gameFinished = winner !== undefined
+      
+      if (gameFinished) {
+        console.log(`[STORE] GAME OVER at end of turn! ${winner.name} wins with ${winner.score} points!`)
+      }
 
-    return {
-      players: updatedPlayers,
-      currentPlayerId: state.players[nextPlayerIndex].id,
-      turnNumber: newTurnNumber,
-      rollCount: 0,
-      hasBuilt: false, // Reset for next turn
-      dice: state.dice.map(die => ({ ...die, locked: false, used: false })),
-      status: gameFinished ? 'finished' : 'in_progress',
-      // Reset builds for next player (or keep cumulative - your choice)
-      // builds: { roads: 0, settlements: 0, cities: 0, knights: 0 } // uncomment to reset per turn
+      set({
+        players: updatedPlayers,
+        currentPlayerId: state.players[nextPlayerIndex].id,
+        turnNumber: newTurnNumber,
+        rollCount: 0,
+        hasBuilt: false,
+        dice: state.dice.map(die => ({ ...die, locked: false, used: false })),
+        status: gameFinished ? 'finished' : 'in_progress',
+      })
+      return
     }
-  }),
+    
+    // Call API for multiplayer game
+    try {
+      await endTurnAPI(state.gameId)
+      
+      // For now, still update local state
+      // TODO: In full multiplayer, this would come from polling/websocket
+      const currentPlayerIndex = state.players.findIndex(p => p.id === state.currentPlayerId)
+      const nextPlayerIndex = (currentPlayerIndex + 1) % state.players.length
+      
+      set({
+        currentPlayerId: state.players[nextPlayerIndex].id,
+        rollCount: 0,
+        hasBuilt: false,
+        dice: state.dice.map(die => ({ ...die, locked: false, used: false })),
+      })
+    } catch (error) {
+      console.error('[STORE] Error ending turn:', error)
+    }
+  },
 
-  resetGame: (playerCount = 4, playerName = 'Player 1') => set({
-    players: Array.from({ length: playerCount }, (_, i) => ({
-      id: String(i + 1),
-      name: i === 0 ? playerName : `Player ${i + 1}`,
-      score: 0,
-      turnsCompleted: 0,
-      roads: 0,
-      settlements: 0,
-      cities: 0,
-      knights: 0
-    })),
+  setGameId: (gameId) => set({ gameId }),
+
+  resetGame: (playerData = []) => set({
+    players: playerData.length > 0 
+      ? playerData.map((player, i) => ({
+          id: String(i + 1),
+          name: player.name || player.playerName || `Player ${i + 1}`,
+          score: 0,
+          turnsCompleted: 0,
+          roads: 0,
+          settlements: 0,
+          cities: 0,
+          knights: 0,
+          isBot: player.isBot || false
+        }))
+      : Array.from({ length: 4 }, (_, i) => ({
+          id: String(i + 1),
+          name: `Player ${i + 1}`,
+          score: 0,
+          turnsCompleted: 0,
+          roads: 0,
+          settlements: 0,
+          cities: 0,
+          knights: 0,
+          isBot: false
+        })),
     currentPlayerId: '1',
     turnNumber: 1,
     rollCount: 0,

@@ -73,9 +73,14 @@ export default function ResourceIcon({ resource, size = 'md' }) {
       bgColor: 'bg-cyber-purple/20',
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-          {/* Pixelated ore/crystal */}
-          <polygon points="12,2 6,10 12,18 18,10" />
-          <rect x="10" y="18" width="4" height="4" />
+          {/* Three coal chunks */}
+          <rect x="4" y="6" width="7" height="7" />
+          <rect x="13" y="4" width="7" height="7" />
+          <rect x="8" y="13" width="8" height="8" />
+          {/* Darker accents for depth */}
+          <rect x="5" y="7" width="2" height="2" opacity="0.4" />
+          <rect x="14" y="5" width="2" height="2" opacity="0.4" />
+          <rect x="10" y="15" width="2" height="2" opacity="0.4" />
         </svg>
       )
     },

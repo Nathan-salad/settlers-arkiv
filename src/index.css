@@ -171,3 +171,35 @@ body {
 .glow-pulse {
   animation: glowPulse 1.5s ease-in-out infinite;
 }
+
+/* Scanning line animation */
+@keyframes scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-scan {
+  animation: scan 1.5s ease-in-out infinite;
+}
+
+/* Animated dots - using opacity changes */
+@keyframes dots {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.animate-dots {
+  animation: dots 1.5s ease-in-out infinite;
+  display: inline-block;
+}

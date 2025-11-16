@@ -12,12 +12,15 @@ import saladLogo from './salad.svg'
 import arkivLogo from './arkiv.png'
 import { getDiceResources, canBuild, getMissingResources, formatResourceName } from '../utils/resourceValidation'
 import { getAvailableResources } from '../utils/resourceConsumption'
+import { useBotTurn } from '../hooks/useBotTurn'
 
-export default function GameTable({ onNavigate }) {
+export default function GameTable({ onNavigate, bots = [] }) {
   const store = useGameStore()
+  const { isBotThinking, currentBotAction } = useBotTurn(bots)
   
   const players = store.players || []
   const currentPlayerId = store.currentPlayerId || '1'
+  const localPlayerId = store.localPlayerId || '1'
   const turnNumber = store.turnNumber || 1
   const rollCount = store.rollCount || 0
   const maxRolls = store.maxRolls || 3
@@ -36,6 +39,10 @@ export default function GameTable({ onNavigate }) {
   const [showScoreSheet, setShowScoreSheet] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showTurnNotification, setShowTurnNotification] = useState(false)
+  const [shouldGlowRoll, setShouldGlowRoll] = useState(false)
+  
+  // Check if it's the local player's turn
+  const isMyTurn = currentPlayerId === localPlayerId
   const [lastBuild, setLastBuild] = useState(null)
   const [showBuildAnimation, setShowBuildAnimation] = useState(false)
   const [bonusAchievement, setBonusAchievement] = useState(null) // { type: 'longestRoad' | 'largestArmy', playerName: string }
@@ -80,8 +87,27 @@ export default function GameTable({ onNavigate }) {
     }
   }, [status, onNavigate])
 
+  // Glow roll button after 3 seconds of inactivity
+  useEffect(() => {
+    // Only glow if it's your turn and you can roll
+    if (!isMyTurn || !canRoll || isBotThinking) {
+      setShouldGlowRoll(false)
+      return
+    }
+
+    // Start a 3-second timer
+    const timer = setTimeout(() => {
+      setShouldGlowRoll(true)
+    }, 3000)
+
+    return () => {
+      clearTimeout(timer)
+      setShouldGlowRoll(false)
+    }
+  }, [isMyTurn, canRoll, rollCount, hasBuilt, isBotThinking])
+
   const handleRoll = () => {
-    if (!canRoll) return
+    if (!canRoll || isBotThinking) return
     // Dismiss turn notification immediately when rolling
     setShowTurnNotification(false)
     setIsRolling(true)
@@ -90,8 +116,10 @@ export default function GameTable({ onNavigate }) {
   }
 
   const handleEndTurn = () => {
+    if (isBotThinking) return
     endTurn()
-    setShowTurnNotification(true)
+    // Show notification after ending turn (now it's someone else's turn)
+    setTimeout(() => setShowTurnNotification(true), 100)
   }
 
   // Keyboard shortcuts: 'r' for roll, 'e' for end turn, '1-6' for dice
@@ -224,7 +252,7 @@ export default function GameTable({ onNavigate }) {
                     value={die.value}
                     locked={die.locked}
                     used={die.used}
-                    onToggleLock={() => hasRolled && !die.used && toggleLock(index)}
+                    onToggleLock={() => hasRolled && !die.used && isMyTurn && toggleLock(index)}
                     isRolling={isRolling && !die.locked}
                   />
                 ))}
@@ -242,10 +270,12 @@ export default function GameTable({ onNavigate }) {
               
               <button
                 onClick={handleRoll}
-                disabled={!canRoll}
+                disabled={!canRoll || isBotThinking || !isMyTurn}
                 className={`neon-btn w-full ${
-                  canRoll
-                    ? 'text-cyber-blue border-cyber-blue'
+                  canRoll && !isBotThinking && isMyTurn
+                    ? shouldGlowRoll 
+                      ? 'text-cyber-blue border-cyber-blue animate-pulse shadow-[0_0_20px_rgba(0,212,255,0.6)]'
+                      : 'text-cyber-blue border-cyber-blue'
                     : 'text-gray-600 border-gray-600 opacity-50 cursor-not-allowed'
                 }`}
               >
@@ -267,7 +297,7 @@ export default function GameTable({ onNavigate }) {
                   // Check current player's individual build count
                   const currentBuilds = (currentPlayer && currentPlayer[action.type]) || 0
                   const isAtMax = currentBuilds >= action.maxBuilds
-                  const canAfford = hasRolled && canBuild(action.resources, availableResources) && !isAtMax
+                  const canAfford = hasRolled && canBuild(action.resources, availableResources) && !isAtMax && isMyTurn
                   const missingResources = hasRolled ? getMissingResources(action.resources, availableResources) : []
                   
                   return (
@@ -362,6 +392,13 @@ export default function GameTable({ onNavigate }) {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <div className="font-bold text-cyber-blue">{player.name}</div>
+                          {/* Bot Badge */}
+                          {player.isBot && (
+                            <div className="inline-flex items-center gap-1 bg-cyber-purple/20 border border-cyber-purple text-cyber-purple px-2 py-0.5 rounded text-xs font-bold">
+                              <span>🤖</span>
+                              <span>AI</span>
+                            </div>
+                          )}
                           {/* Longest Road Badge */}
                           {longestRoadHolder === player.id && (
                             <div className="inline-flex items-center gap-1 bg-cyber-blue/20 border border-cyber-blue text-cyber-blue px-2 py-0.5 rounded text-xs font-bold animate-pulse">
@@ -376,9 +413,6 @@ export default function GameTable({ onNavigate }) {
                               <span>Largest Army</span>
                             </div>
                           )}
-                        </div>
-                        <div className="text-xs text-cyber-pink font-mono mt-1">
-                          VP: {player.score}/{victoryPointGoal}
                         </div>
                         <div className="text-xs text-cyber-blue/70 font-mono mt-1 flex gap-3">
                           <span title="Roads (5+ for Longest Road bonus)">
@@ -409,9 +443,9 @@ export default function GameTable({ onNavigate }) {
               
               <button
                 onClick={handleEndTurn}
-                disabled={!hasRolled}
+                disabled={!hasRolled || !isMyTurn}
                 className={`neon-btn w-full ${
-                  hasRolled
+                  hasRolled && isMyTurn
                     ? hasBuilt 
                       ? 'text-cyber-green border-cyber-green pulse-green'
                       : 'text-cyber-green border-cyber-green'
@@ -455,9 +489,29 @@ export default function GameTable({ onNavigate }) {
         {/* Turn Notification */}
         <TurnNotification 
           playerName={currentPlayer?.name}
-          show={showTurnNotification}
+          show={showTurnNotification || !isMyTurn}
+          isMyTurn={isMyTurn}
           onComplete={() => setShowTurnNotification(false)}
         />
+
+        {/* Bot Thinking Indicator */}
+        {isBotThinking && currentBotAction && (
+          <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
+            <div className="bg-cyber-purple/95 border-2 border-cyber-purple p-6 rounded-lg shadow-[0_0_30px_rgba(168,85,247,0.5)] animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="text-4xl animate-spin">🤖</div>
+                <div>
+                  <div className="text-cyber-green font-mono font-bold text-xl">
+                    {currentPlayer?.name}
+                  </div>
+                  <div className="text-white font-mono text-sm mt-1">
+                    {currentBotAction.message || 'Thinking...'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Build Animation */}
         <BuildAnimation 
