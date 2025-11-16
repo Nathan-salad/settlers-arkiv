@@ -26,7 +26,7 @@ describe('gameStore', () => {
       turnNumber: 1,
       rollCount: 0,
       maxRolls: 3,
-      maxTurns: 15,
+      victoryPointGoal: 10,
       dice: [
         { value: 1, locked: false, used: false },
         { value: 2, locked: false, used: false },
@@ -338,26 +338,59 @@ describe('gameStore', () => {
       expect(useGameStore.getState().players[0].turnsCompleted).toBe(1)
     })
 
-    it('should set status to finished after turn 15', () => {
+    it('should set status to finished when player reaches 10 VP', () => {
       useGameStore.setState({ 
-        turnNumber: 15,
-        currentPlayerId: '4'
+        players: [
+          { id: '1', name: 'Player 1', score: 10, turnsCompleted: 0 },
+          { id: '2', name: 'Player 2', score: 5, turnsCompleted: 0 },
+          { id: '3', name: 'Player 3', score: 3, turnsCompleted: 0 },
+          { id: '4', name: 'Player 4', score: 2, turnsCompleted: 0 },
+        ],
+        currentPlayerId: '1'
       })
 
       const { endTurn } = useGameStore.getState()
       endTurn()
 
       expect(useGameStore.getState().status).toBe('finished')
-      expect(useGameStore.getState().turnNumber).toBe(16)
     })
 
-    it('should not finish game before turn 15', () => {
-      useGameStore.setState({ turnNumber: 14, currentPlayerId: '4' })
+    it('should not finish game when no player has 10 VP', () => {
+      useGameStore.setState({ 
+        players: [
+          { id: '1', name: 'Player 1', score: 9, turnsCompleted: 0 },
+          { id: '2', name: 'Player 2', score: 8, turnsCompleted: 0 },
+          { id: '3', name: 'Player 3', score: 7, turnsCompleted: 0 },
+          { id: '4', name: 'Player 4', score: 6, turnsCompleted: 0 },
+        ],
+        currentPlayerId: '4' 
+      })
 
       const { endTurn } = useGameStore.getState()
       endTurn()
 
       expect(useGameStore.getState().status).toBe('in_progress')
+    })
+
+    it('should finish game immediately when building reaches 10 VP', () => {
+      // Set up player with 9 VP, about to build settlement for +3 = 12 VP
+      useGameStore.setState({
+        builds: { roads: 9, settlements: 0, cities: 0, knights: 0 },
+        players: [
+          { id: '1', name: 'Player 1', score: 9, turnsCompleted: 0 },
+          { id: '2', name: 'Player 2', score: 0, turnsCompleted: 0 },
+          { id: '3', name: 'Player 3', score: 0, turnsCompleted: 0 },
+          { id: '4', name: 'Player 4', score: 0, turnsCompleted: 0 },
+        ],
+        currentPlayerId: '1'
+      })
+
+      const { performBuild } = useGameStore.getState()
+      performBuild('settlements', ['lumber', 'brick', 'wheat', 'wool'])
+
+      // Should finish immediately
+      expect(useGameStore.getState().status).toBe('finished')
+      expect(useGameStore.getState().players[0].score).toBe(12) // 9 + 3
     })
   })
 

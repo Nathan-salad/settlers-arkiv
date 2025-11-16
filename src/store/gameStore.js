@@ -14,7 +14,7 @@ const useGameStore = create((set) => ({
   turnNumber: 1,
   rollCount: 0,
   maxRolls: 3,
-  maxTurns: 15,
+  victoryPointGoal: 10, // Island Two: First to 10 VP wins
   dice: [
     { value: 1, locked: false, used: false },
     { value: 2, locked: false, used: false },
@@ -109,11 +109,20 @@ const useGameStore = create((set) => ({
     
     console.log(`[STORE] Build complete, resources consumed, dice updated, turn ending`)
     
+    // Check for winner (Island Two: First to 10 VP)
+    const winner = updatedPlayers.find(p => p.score >= 10)
+    const gameFinished = winner !== undefined
+    
+    if (gameFinished) {
+      console.log(`[STORE] GAME OVER! ${winner.name} wins with ${winner.score} points!`)
+    }
+    
     return {
       builds: newBuilds,
       players: updatedPlayers,
       dice: updatedDice,
-      hasBuilt: true // Mark that player has built this turn
+      hasBuilt: true, // Mark that player has built this turn
+      status: gameFinished ? 'finished' : state.status
     }
   }),
 
@@ -130,7 +139,14 @@ const useGameStore = create((set) => ({
     )
     
     const newTurnNumber = isLastPlayer ? state.turnNumber + 1 : state.turnNumber
-    const gameFinished = newTurnNumber > state.maxTurns
+    
+    // Check for winner (Island Two: First to 10 VP)
+    const winner = updatedPlayers.find(p => p.score >= state.victoryPointGoal)
+    const gameFinished = winner !== undefined
+    
+    if (gameFinished) {
+      console.log(`[STORE] GAME OVER at end of turn! ${winner.name} wins with ${winner.score} points!`)
+    }
 
     return {
       players: updatedPlayers,
@@ -150,6 +166,7 @@ const useGameStore = create((set) => ({
     rollCount: 0,
     hasBuilt: false,
     currentPlayerId: '1',
+    victoryPointGoal: 10,
     dice: [
       { value: 1, locked: false, used: false },
       { value: 2, locked: false, used: false },

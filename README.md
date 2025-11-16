@@ -82,12 +82,14 @@ See `requirements.md` for full PRD.
 
 Rules PDF: `catan_dice_game_rules.pdf`
 
+**Island Two Variant:**
 - 2-4 players
-- 15 turns per player
+- **First to 10 Victory Points wins** (no turn limit)
 - 3 rolls per turn maximum
 - Lock/unlock dice between rolls
 - Build roads, settlements, cities, knights
 - Score based on builds (per official rules)
+- **2 gold dice = 1 resource** of your choice
 
 ## 🛠️ Development
 

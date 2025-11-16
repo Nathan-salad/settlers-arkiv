@@ -39,13 +39,14 @@ Non-Goals
 ⸻
 
 3. Core Game Rules
-	•	Base rules only; no house rules.
+	•	Island Two variant (from official PDF)
 	•	2–4 players (4 max).
-	•	15 fixed turns per player.
+	•	First to 10 Victory Points wins (no turn limit)
 	•	Up to 3 rolls per turn, dice lock supported.
 	•	All build actions available.
-	•	Scoring mirrors PDF exactly.
-	•	Game ends after all players complete 15 turns.
+	•	Scoring: Roads (1 pt), Settlements (3 pt), Cities (5 pt), Knights (2 pt)
+	•	2 gold dice = 1 resource (trading rule)
+	•	Game ends immediately when someone reaches 10 VP.
 
 ⸻
 
@@ -135,7 +136,7 @@ Footer
 type Player = {
   id: string;
   name: string;
-  score: number;
+  score: number;try 
   turnsCompleted: number;
 };
 

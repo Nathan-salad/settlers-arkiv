@@ -18,7 +18,7 @@ export default function GameTable({ onNavigate }) {
     turnNumber, 
     rollCount, 
     maxRolls,
-    maxTurns,
+    victoryPointGoal,
     dice, 
     status,
     builds,
@@ -136,23 +136,19 @@ export default function GameTable({ onNavigate }) {
     <div className="min-h-screen p-4">
       <div className="max-w-7xl mx-auto">
         {/* HUD */}
-        <div className="mb-6 bg-cyber-darker border-2 border-cyber-blue p-4 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div className="bg-cyber-darker border-2 border-cyber-blue p-6 mb-6 rounded-lg">
+          <div className="grid grid-cols-3 gap-4 text-center font-mono">
             <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">CURRENT PLAYER</div>
-              <div className="text-lg font-bold text-cyber-blue">{currentPlayer?.name}</div>
+              <div className="text-cyber-blue text-sm">CURRENT PLAYER</div>
+              <div className="text-2xl font-bold text-cyber-green">{currentPlayer?.name || 'Player 1'}</div>
             </div>
             <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">TURN</div>
-              <div className="text-lg font-bold text-cyber-green">{turnNumber} / {maxTurns}</div>
+              <div className="text-cyber-blue text-sm">VICTORY POINTS</div>
+              <div className="text-2xl font-bold text-cyber-purple">{currentPlayer?.score || 0} / {victoryPointGoal}</div>
             </div>
             <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">ROLLS</div>
-              <div className="text-lg font-bold text-cyber-purple">{rollCount} / {maxRolls}</div>
-            </div>
-            <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">SCORE</div>
-              <div className="text-lg font-bold text-cyber-pink">{currentPlayer?.score}</div>
+              <div className="text-cyber-blue text-sm">TURN</div>
+              <div className="text-2xl font-bold text-cyber-pink">#{turnNumber}</div>
             </div>
           </div>
         </div>

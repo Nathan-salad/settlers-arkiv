@@ -23,13 +23,12 @@ export default function HelpModal({ onClose }) {
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Overview */}
-          <section>
+          <section className="mb-6">
             <h3 className="text-xl font-bold text-cyber-green mb-3 font-mono">
-              OBJECTIVE
+              [OBJECTIVE]
             </h3>
-            <p className="text-cyber-blue/90 font-mono text-sm leading-relaxed">
-              Build roads, settlements, cities, and knights by rolling dice. 
-              Complete 15 turns and score the most points to win!
+            <p className="text-gray-300 leading-relaxed mb-3">
+              <strong className="text-cyber-pink">Island Two Rules:</strong> Be the first player to reach <strong className="text-cyber-green">10 Victory Points</strong> by building roads, settlements, cities, and knights!
             </p>
           </section>
 
@@ -155,6 +154,10 @@ export default function HelpModal({ onClose }) {
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>
                 <span>You have 3 rolls per turn - use them wisely!</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-cyber-green">▸</span>
+                <span>Game ends immediately when someone reaches 10 Victory Points!</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>
