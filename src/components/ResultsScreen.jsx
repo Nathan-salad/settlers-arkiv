@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti'
 import useGameStore from '../store/gameStore'
 
 export default function ResultsScreen({ onNavigate }) {
-  const { players, resetGame } = useGameStore()
+  const { players, resetGame, longestRoadHolder, largestArmyHolder } = useGameStore()
 
   // Sort players by score
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
@@ -86,24 +86,69 @@ export default function ResultsScreen({ onNavigate }) {
                   : 'border-cyber-blue/30'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`text-5xl font-bold ${getRankColor(index)}`}>
-                    #{index + 1}
-                  </div>
-                  <div>
-                    <div className={`text-sm font-mono mb-1 ${getRankColor(index)}`}>
-                      {getRankLabel(index)}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`text-5xl font-bold ${getRankColor(index)}`}>
+                      #{index + 1}
                     </div>
-                    <div className="text-2xl font-bold text-cyber-blue">
-                      {player.name}
+                    <div>
+                      <div className={`text-sm font-mono mb-1 ${getRankColor(index)}`}>
+                        {getRankLabel(index)}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-2xl font-bold text-cyber-blue">
+                          {player.name}
+                        </div>
+                        {/* Badges */}
+                        {longestRoadHolder === player.id && (
+                          <div className="inline-flex items-center gap-1 bg-cyber-blue/20 border border-cyber-blue text-cyber-blue px-2 py-0.5 rounded text-xs font-bold">
+                            <span>🛣️</span>
+                            <span>LONGEST</span>
+                          </div>
+                        )}
+                        {largestArmyHolder === player.id && (
+                          <div className="inline-flex items-center gap-1 bg-cyber-pink/20 border border-cyber-pink text-cyber-pink px-2 py-0.5 rounded text-xs font-bold">
+                            <span>⚔️</span>
+                            <span>ARMY</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-cyber-pink font-mono mb-1">FINAL SCORE</div>
+                    <div className={`text-4xl font-bold ${getRankColor(index)}`}>
+                      {player.score}
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-xs text-cyber-pink font-mono mb-1">FINAL SCORE</div>
-                  <div className={`text-4xl font-bold ${getRankColor(index)}`}>
-                    {player.score}
+                
+                {/* Player Stats */}
+                <div className="grid grid-cols-4 gap-3 pt-4 border-t border-cyber-blue/30">
+                  <div className="text-center">
+                    <div className="text-xs text-cyber-blue/70 font-mono mb-1">Roads</div>
+                    <div className="text-lg font-bold text-cyber-blue">
+                      🛣️ {player.roads || 0}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-cyber-pink/70 font-mono mb-1">Knights</div>
+                    <div className="text-lg font-bold text-cyber-pink">
+                      ⚔️ {player.knights || 0}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-cyber-green/70 font-mono mb-1">Settlements</div>
+                    <div className="text-lg font-bold text-cyber-green">
+                      🏘️ {player.settlements || 0}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-cyber-purple/70 font-mono mb-1">Cities</div>
+                    <div className="text-lg font-bold text-cyber-purple">
+                      🏙️ {player.cities || 0}
+                    </div>
                   </div>
                 </div>
               </div>
