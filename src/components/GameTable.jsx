@@ -86,6 +86,20 @@ export default function GameTable({ onNavigate }) {
     setTimeout(() => setIsRolling(false), 500)
   }
 
+  // Keyboard shortcut: 'r' for roll
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        if (canRoll) {
+          handleRoll()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [canRoll, handleRoll])
+
   const handleEndTurn = () => {
     endTurn()
     setShowTurnNotification(true)
