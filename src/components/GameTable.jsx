@@ -79,6 +79,8 @@ export default function GameTable({ onNavigate }) {
 
   const handleRoll = () => {
     if (!canRoll) return
+    // Dismiss turn notification immediately when rolling
+    setShowTurnNotification(false)
     setIsRolling(true)
     rollDice()
     setTimeout(() => setIsRolling(false), 500)
