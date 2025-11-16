@@ -287,14 +287,22 @@ export default function GameTable({ onNavigate }) {
                         : 'border-cyber-blue/30'
                     }`}
                   >
-                    <div className="flex justify-between items-center">
-                      <div>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
                         <div className="font-bold text-cyber-blue">{player.name}</div>
                         <div className="text-xs text-cyber-pink font-mono mt-1">
                           VP: {player.score}/{victoryPointGoal}
                         </div>
+                        <div className="text-xs text-cyber-blue/70 font-mono mt-1 flex gap-3">
+                          <span title="Roads (5+ for Longest Road bonus)">
+                            🛣️ {player.roads || 0}
+                          </span>
+                          <span title="Knights (3+ for Largest Army bonus)">
+                            ⚔️ {player.knights || 0}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-2xl font-bold text-cyber-green">
+                      <div className="text-2xl font-bold text-cyber-green ml-2">
                         {player.score}
                       </div>
                     </div>
