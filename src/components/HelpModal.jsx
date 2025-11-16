@@ -139,7 +139,8 @@ export default function HelpModal({ onClose }) {
 
           {/* Tips */}
           <section className="border-t-2 border-cyber-blue/30 pt-6">
-            <p className="text-gray-300 leading-relaxed mb-4 font-bold text-cyber-pink">Victory Points:</p>
+
+
             <ul className="space-y-2 ml-4">
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>
@@ -164,6 +165,14 @@ export default function HelpModal({ onClose }) {
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>
                 <span>You have 3 rolls per turn - use them wisely!</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-cyber-green">▸</span>
+                <span>You can build multiple things per turn if you have resources!</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-cyber-green">▸</span>
+                <span>Once you build, you can't roll anymore (must end turn)</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>

@@ -167,7 +167,7 @@ const useGameStore = create((set) => ({
       builds: newBuilds,
       players: updatedPlayers,
       dice: updatedDice,
-      hasBuilt: true, // Mark that player has built this turn
+      hasBuilt: true, // Mark that player has built (can't roll anymore)
       status: gameFinished ? 'finished' : state.status,
       longestRoadHolder: newLongestRoadHolder,
       largestArmyHolder: newLargestArmyHolder

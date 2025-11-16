@@ -70,18 +70,18 @@ export default function GameTable({ onNavigate }) {
       knights: 14
     }
     
-    const currentCount = builds[buildType] || 0
-    const maxAllowed = maxLimits[buildType] || 999
-    
-    console.log(`[BUILD] ${buildType}: ${currentCount}/${maxAllowed}`)
-    
-    if (currentCount >= maxAllowed) {
-      console.log(`[BUILD] MAX REACHED for ${buildType}`)
+    // Check current player's individual build count
+    const currentCount = (currentPlayer && currentPlayer[buildType]) || 0
+    if (currentCount >= maxLimits[buildType]) {
+      console.log(`[BUILD] ${buildType}: Already at max (${maxLimits[buildType]})`)
       return
     }
     
+    // Get fresh available resources (accounting for already-used dice this turn)
+    const currentAvailableResources = getAvailableResources(dice)
+    
     // Validate resources before building
-    if (!canBuild(required, availableResources)) {
+    if (!canBuild(required, currentAvailableResources)) {
       console.log(`[BUILD] Insufficient resources for ${buildType}`)
       return
     }
@@ -191,12 +191,12 @@ export default function GameTable({ onNavigate }) {
                     : 'text-gray-600 border-gray-600 opacity-50 cursor-not-allowed'
                 }`}
               >
-                {hasBuilt 
-                  ? 'BUILT - END TURN' 
-                  : rollCount === 0 
+                {rollCount === 0 
                   ? 'ROLL DICE' 
                   : canRoll 
                   ? `RE-ROLL (${maxRolls - rollCount} left)` 
+                  : hasBuilt
+                  ? 'NO MORE ROLLS (already built)'
                   : 'NO ROLLS LEFT'}
               </button>
             </div>
@@ -206,9 +206,10 @@ export default function GameTable({ onNavigate }) {
               <h3 className="text-xl font-bold text-cyber-green mb-4 font-mono">[BUILD ACTIONS]</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {buildActions.map(action => {
-                  const currentBuilds = builds[action.type] || 0
+                  // Check current player's individual build count
+                  const currentBuilds = (currentPlayer && currentPlayer[action.type]) || 0
                   const isAtMax = currentBuilds >= action.maxBuilds
-                  const canAfford = hasRolled && !hasBuilt && canBuild(action.resources, availableResources) && !isAtMax
+                  const canAfford = hasRolled && canBuild(action.resources, availableResources) && !isAtMax
                   const missingResources = hasRolled ? getMissingResources(action.resources, availableResources) : []
                   
                   return (
@@ -224,14 +225,11 @@ export default function GameTable({ onNavigate }) {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div className="font-bold text-lg">{action.label}</div>
-                        {canAfford && !isAtMax && !hasBuilt && (
+                        {canAfford && !isAtMax && (
                           <span className="text-cyber-green text-xs font-mono">✓ CAN BUILD</span>
                         )}
                         {isAtMax && (
                           <span className="text-cyber-pink text-xs font-mono">MAX REACHED</span>
-                        )}
-                        {hasBuilt && (
-                          <span className="text-cyber-pink text-xs font-mono">ALREADY BUILT</span>
                         )}
                       </div>
                       
@@ -261,7 +259,17 @@ export default function GameTable({ onNavigate }) {
             </div>
 
             {/* Build Progress Board */}
-            <BuildBoard builds={builds} playerName={currentPlayer?.name} />
+            {currentPlayer && (
+              <BuildBoard 
+                builds={{
+                  roads: currentPlayer.roads || 0,
+                  settlements: currentPlayer.settlements || 0,
+                  cities: currentPlayer.cities || 0,
+                  knights: currentPlayer.knights || 0
+                }} 
+                playerName={currentPlayer.name || 'Player 1'} 
+              />
+            )}
           </div>
 
           {/* Right: Player List & Controls */}
@@ -322,7 +330,7 @@ export default function GameTable({ onNavigate }) {
                     : 'text-gray-600 border-gray-600 opacity-50 cursor-not-allowed'
                 }`}
               >
-                {hasBuilt ? '✓ END TURN (REQUIRED)' : 'END TURN'}
+                {hasBuilt ? '✓ END TURN' : 'END TURN'}
               </button>
 
               <button
