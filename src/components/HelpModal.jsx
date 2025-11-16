@@ -139,17 +139,27 @@ export default function HelpModal({ onClose }) {
 
           {/* Tips */}
           <section className="border-t-2 border-cyber-blue/30 pt-6">
-            <h3 className="text-xl font-bold text-cyber-green mb-3 font-mono">
-              TIPS
-            </h3>
-            <ul className="space-y-2 text-sm font-mono text-cyber-blue/90">
+            <p className="text-gray-300 leading-relaxed mb-4 font-bold text-cyber-pink">Victory Points:</p>
+            <ul className="space-y-2 ml-4">
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>
-                <span>Lock dice strategically to build specific structures</span>
+                <span><strong className="text-cyber-green">Settlements:</strong> 1 VP each</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>
-                <span>Cities are worth the most points (5 each)</span>
+                <span><strong className="text-cyber-green">Cities:</strong> 2 VP each</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-cyber-green">▸</span>
+                <span><strong className="text-cyber-pink">Longest Road:</strong> 2 VP bonus (5+ roads, first to reach)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-cyber-green">▸</span>
+                <span><strong className="text-cyber-pink">Largest Army:</strong> 2 VP bonus (3+ knights, first to reach)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-cyber-green">▸</span>
+                <span>Roads and Knights: 0 VP individually (only bonuses count)</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-cyber-green">▸</span>

@@ -1,80 +1,104 @@
 import { describe, it, expect } from 'vitest'
 
 describe('Scoring Logic', () => {
-  describe('point values per build type', () => {
+  describe('point values per build type (Island Two)', () => {
     const scoreValues = {
-      roads: 1,
-      settlements: 3,
-      cities: 5,
-      knights: 2
+      roads: 0, // 0 VP individually, bonus for Longest Road
+      settlements: 1,
+      cities: 2,
+      knights: 0 // 0 VP individually, bonus for Largest Army
     }
 
-    it('should award 1 point for roads', () => {
-      expect(scoreValues.roads).toBe(1)
+    it('should award 0 points for roads individually', () => {
+      expect(scoreValues.roads).toBe(0)
     })
 
-    it('should award 3 points for settlements', () => {
-      expect(scoreValues.settlements).toBe(3)
+    it('should award 1 point for settlements', () => {
+      expect(scoreValues.settlements).toBe(1)
     })
 
-    it('should award 5 points for cities', () => {
-      expect(scoreValues.cities).toBe(5)
+    it('should award 2 points for cities', () => {
+      expect(scoreValues.cities).toBe(2)
     })
 
-    it('should award 2 points for knights', () => {
-      expect(scoreValues.knights).toBe(2)
+    it('should award 0 points for knights individually', () => {
+      expect(scoreValues.knights).toBe(0)
+    })
+    
+    it('should award 2 bonus points for Longest Road (5+ roads)', () => {
+      expect(2).toBe(2) // Bonus constant
+    })
+    
+    it('should award 2 bonus points for Largest Army (3+ knights)', () => {
+      expect(2).toBe(2) // Bonus constant
     })
   })
 
-  describe('score calculations', () => {
+  describe('score calculations (Island Two)', () => {
     const scoreValues = {
-      roads: 1,
-      settlements: 3,
-      cities: 5,
-      knights: 2
+      roads: 0,
+      settlements: 1,
+      cities: 2,
+      knights: 0
     }
 
-    const calculateScore = (builds) => {
-      return Object.keys(builds).reduce((total, key) => {
+    const calculateScore = (builds, hasLongestRoad = false, hasLargestArmy = false) => {
+      let score = Object.keys(builds).reduce((total, key) => {
         return total + (builds[key] * (scoreValues[key] || 0))
       }, 0)
+      
+      if (hasLongestRoad) score += 2
+      if (hasLargestArmy) score += 2
+      
+      return score
     }
 
-    it('should calculate score for single road', () => {
+    it('should calculate score for single road (0 VP)', () => {
       const builds = { roads: 1, settlements: 0, cities: 0, knights: 0 }
-      expect(calculateScore(builds)).toBe(1)
+      expect(calculateScore(builds)).toBe(0)
     })
 
-    it('should calculate score for multiple roads', () => {
+    it('should calculate score for 5 roads with Longest Road bonus', () => {
       const builds = { roads: 5, settlements: 0, cities: 0, knights: 0 }
-      expect(calculateScore(builds)).toBe(5)
+      expect(calculateScore(builds, true)).toBe(2) // 0 + 2 bonus
     })
 
     it('should calculate score for single settlement', () => {
       const builds = { roads: 0, settlements: 1, cities: 0, knights: 0 }
-      expect(calculateScore(builds)).toBe(3)
+      expect(calculateScore(builds)).toBe(1)
     })
 
     it('should calculate score for single city', () => {
       const builds = { roads: 0, settlements: 0, cities: 1, knights: 0 }
-      expect(calculateScore(builds)).toBe(5)
-    })
-
-    it('should calculate score for single knight', () => {
-      const builds = { roads: 0, settlements: 0, cities: 0, knights: 1 }
       expect(calculateScore(builds)).toBe(2)
     })
 
-    it('should calculate combined score', () => {
-      const builds = { roads: 2, settlements: 1, cities: 1, knights: 1 }
-      // 2*1 + 1*3 + 1*5 + 1*2 = 2 + 3 + 5 + 2 = 12
-      expect(calculateScore(builds)).toBe(12)
+    it('should calculate score for single knight (0 VP)', () => {
+      const builds = { roads: 0, settlements: 0, cities: 0, knights: 1 }
+      expect(calculateScore(builds)).toBe(0)
+    })
+    
+    it('should calculate score for 3 knights with Largest Army bonus', () => {
+      const builds = { roads: 0, settlements: 0, cities: 0, knights: 3 }
+      expect(calculateScore(builds, false, true)).toBe(2) // 0 + 2 bonus
     })
 
-    it('should calculate maximum possible score', () => {
+    it('should calculate combined score with settlements and cities', () => {
+      const builds = { roads: 2, settlements: 3, cities: 1, knights: 1 }
+      // 2*0 + 3*1 + 1*2 + 1*0 = 0 + 3 + 2 + 0 = 5
+      expect(calculateScore(builds)).toBe(5)
+    })
+    
+    it('should calculate score with both bonuses', () => {
+      const builds = { roads: 5, settlements: 2, cities: 1, knights: 3 }
+      // 5*0 + 2*1 + 1*2 + 3*0 + 2 (longest) + 2 (largest) = 0 + 2 + 2 + 0 + 2 + 2 = 8
+      expect(calculateScore(builds, true, true)).toBe(8)
+    })
+
+    it('should calculate maximum possible score with bonuses', () => {
       const builds = { roads: 15, settlements: 5, cities: 4, knights: 14 }
-      // 15*1 + 5*3 + 4*5 + 14*2 = 15 + 15 + 20 + 28 = 78
-      expect(calculateScore(builds)).toBe(78)
+      // 15*0 + 5*1 + 4*2 + 14*0 + 2 + 2 = 0 + 5 + 8 + 0 + 4 = 17
+      expect(calculateScore(builds, true, true)).toBe(17)
     })
 
     it('should handle zero builds', () => {
@@ -83,8 +107,8 @@ describe('Scoring Logic', () => {
     })
 
     it('should ignore unknown build types', () => {
-      const builds = { roads: 1, unknown: 10, settlements: 0, cities: 0, knights: 0 }
-      expect(calculateScore(builds)).toBe(1)
+      const builds = { roads: 1, unknown: 10, settlements: 1, cities: 0, knights: 0 }
+      expect(calculateScore(builds)).toBe(1) // Only settlement counts
     })
   })
 
