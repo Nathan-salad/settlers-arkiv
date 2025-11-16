@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import useGameStore from '../store/gameStore'
 
-export default function CreateJoinScreen({ onNavigate }) {
-  const [tab, setTab] = useState('create') // 'create' | 'join'
+export default function CreateJoinScreen({ onNavigate, initialTab = 'create' }) {
+  const [tab, setTab] = useState(initialTab) // 'create' | 'join'
   const [roomCode, setRoomCode] = useState('')
   const [playerName, setPlayerName] = useState('')
   const [generatedCode, setGeneratedCode] = useState(null)

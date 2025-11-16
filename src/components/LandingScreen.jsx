@@ -17,14 +17,14 @@ export default function LandingScreen({ onNavigate }) {
         {/* CTA Buttons */}
         <div className="flex flex-col md:flex-row gap-6 items-center justify-center mt-12">
           <button
-            onClick={() => onNavigate('createjoin')}
+            onClick={() => onNavigate('createjoin', 'create')}
             className="neon-btn text-cyber-blue border-cyber-blue hover:text-cyber-blue text-lg md:text-xl w-64"
           >
             Create Game
           </button>
           
           <button
-            onClick={() => onNavigate('createjoin')}
+            onClick={() => onNavigate('createjoin', 'join')}
             className="neon-btn text-cyber-pink border-cyber-pink hover:text-cyber-pink text-lg md:text-xl w-64"
           >
             Join Game
