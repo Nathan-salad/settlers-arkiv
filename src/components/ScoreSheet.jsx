@@ -5,23 +5,8 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
   const { longestRoadHolder, largestArmyHolder } = useGameStore()
   
   // Island Two scoring categories
+  // Ordered: Roads, Knights, Settlements, Cities (matches UI)
   const scoreCategories = [
-    { 
-      id: 'settlements', 
-      label: 'Settlements', 
-      icon: 'wheat',
-      description: '1 VP each',
-      pointValue: 1,
-      maxCount: 5
-    },
-    { 
-      id: 'cities', 
-      label: 'Cities', 
-      icon: 'ore',
-      description: '2 VP each',
-      pointValue: 2,
-      maxCount: 4
-    },
     { 
       id: 'roads', 
       label: 'Roads', 
@@ -37,6 +22,22 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
       description: '0 VP (bonus only)',
       pointValue: 0,
       maxCount: 14
+    },
+    { 
+      id: 'settlements', 
+      label: 'Settlements', 
+      icon: 'wheat',
+      description: '1 VP each',
+      pointValue: 1,
+      maxCount: 5
+    },
+    { 
+      id: 'cities', 
+      label: 'Cities', 
+      icon: 'ore',
+      description: '2 VP each',
+      pointValue: 2,
+      maxCount: 4
     },
     { 
       id: 'longestRoad', 
