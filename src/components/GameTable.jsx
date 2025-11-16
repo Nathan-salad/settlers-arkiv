@@ -8,6 +8,8 @@ import BuildBoard from './BuildBoard'
 import TurnNotification from './TurnNotification'
 import BuildAnimation from './BuildAnimation'
 import HelpModal from './HelpModal'
+import saladLogo from './salad.svg'
+import arkivLogo from './arkiv.png'
 import { getDiceResources, canBuild, getMissingResources, formatResourceName } from '../utils/resourceValidation'
 import { getAvailableResources } from '../utils/resourceConsumption'
 
@@ -516,6 +518,24 @@ export default function GameTable({ onNavigate }) {
             </div>
           </div>
         )}
+
+        {/* Branding - Bottom Right */}
+        <div className="fixed bottom-4 right-4 flex items-center gap-3 opacity-50 hover:opacity-100 transition-opacity group">
+          <div className="text-cyber-blue font-bold text-xl font-mono group-hover:glitch">
+            S3TTLΞ
+          </div>
+          <img 
+            src={saladLogo} 
+            alt="Salad" 
+            className="h-6"
+          />
+          <span className="text-cyber-green text-lg font-bold">+</span>
+          <img 
+            src={arkivLogo} 
+            alt="Arkiv" 
+            className="h-6"
+          />
+        </div>
       </div>
     </div>
   )
