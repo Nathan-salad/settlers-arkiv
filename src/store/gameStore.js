@@ -162,10 +162,17 @@ const useGameStore = create((set) => ({
   }),
 
   resetGame: () => set({
+    players: [
+      { id: '1', name: 'Player 1', score: 0, turnsCompleted: 0 },
+      { id: '2', name: 'Player 2', score: 0, turnsCompleted: 0 },
+      { id: '3', name: 'Player 3', score: 0, turnsCompleted: 0 },
+      { id: '4', name: 'Player 4', score: 0, turnsCompleted: 0 },
+    ],
+    currentPlayerId: '1',
     turnNumber: 1,
     rollCount: 0,
     hasBuilt: false,
-    currentPlayerId: '1',
+    maxRolls: 3,
     victoryPointGoal: 10,
     dice: [
       { value: 1, locked: false, used: false },

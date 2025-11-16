@@ -12,22 +12,22 @@ import { getDiceResources, canBuild, getMissingResources, formatResourceName } f
 import { getAvailableResources } from '../utils/resourceConsumption'
 
 export default function GameTable({ onNavigate }) {
-  const { 
-    players, 
-    currentPlayerId, 
-    turnNumber, 
-    rollCount, 
-    maxRolls,
-    victoryPointGoal,
-    dice, 
-    status,
-    builds,
-    hasBuilt,
-    rollDice, 
-    toggleLock,
-    performBuild,
-    endTurn 
-  } = useGameStore()
+  const store = useGameStore()
+  
+  const players = store.players || []
+  const currentPlayerId = store.currentPlayerId || '1'
+  const turnNumber = store.turnNumber || 1
+  const rollCount = store.rollCount || 0
+  const maxRolls = store.maxRolls || 3
+  const victoryPointGoal = store.victoryPointGoal || 10
+  const dice = store.dice || []
+  const status = store.status || 'in_progress'
+  const builds = store.builds || {}
+  const hasBuilt = store.hasBuilt || false
+  const rollDice = store.rollDice
+  const toggleLock = store.toggleLock
+  const performBuild = store.performBuild
+  const endTurn = store.endTurn
 
   const [isRolling, setIsRolling] = useState(false)
   const [showScoreSheet, setShowScoreSheet] = useState(false)
@@ -36,7 +36,7 @@ export default function GameTable({ onNavigate }) {
   const [lastBuild, setLastBuild] = useState(null)
   const [showBuildAnimation, setShowBuildAnimation] = useState(false)
 
-  const currentPlayer = players.find(p => p.id === currentPlayerId)
+  const currentPlayer = players.find(p => p.id === currentPlayerId) || { name: 'Player 1', score: 0 }
   const canRoll = rollCount < maxRolls && !hasBuilt // Can't roll after building
   const hasRolled = rollCount > 0
   
@@ -283,7 +283,7 @@ export default function GameTable({ onNavigate }) {
                       <div>
                         <div className="font-bold text-cyber-blue">{player.name}</div>
                         <div className="text-xs text-cyber-pink font-mono mt-1">
-                          Turns: {player.turnsCompleted}/{maxTurns}
+                          VP: {player.score}/{victoryPointGoal}
                         </div>
                       </div>
                       <div className="text-2xl font-bold text-cyber-green">
