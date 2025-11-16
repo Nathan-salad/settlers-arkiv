@@ -167,7 +167,7 @@ export default function GameTable({ onNavigate }) {
                     locked={die.locked}
                     used={die.used}
                     onToggleLock={() => hasRolled && !die.used && toggleLock(index)}
-                    isRolling={isRolling}
+                    isRolling={isRolling && !die.locked}
                   />
                 ))}
               </div>
