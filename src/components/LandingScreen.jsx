@@ -48,13 +48,22 @@ export default function LandingScreen({ onNavigate }) {
         [STATUS: ONLINE]
       </div>
 
-      {/* Logos - Bottom Right */}
-      <div className="absolute bottom-20 right-4 flex items-center gap-4">
+      {/* Logos - Bottom Left */}
+      <div className="absolute bottom-20 left-4 flex items-center gap-3">
         <img 
           src={saladLogo} 
           alt="Salad" 
           className="h-10 opacity-60 hover:opacity-100 transition-opacity"
         />
+        <a 
+          href="https://coinmarketcap.com/currencies/golem-network-tokens/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-cyber-green text-2xl font-bold glitch animate-pulse hover:text-cyber-blue cursor-pointer transition-colors"
+          title="Learn more about Golem"
+        >
+          +
+        </a>
         <img 
           src={arkivLogo} 
           alt="Arkiv" 

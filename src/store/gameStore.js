@@ -129,27 +129,39 @@ const useGameStore = create((set) => ({
       }
     }
     
-    // Calculate final scores for all players with bonuses
+    // Update only the current player's builds and recalculate their score
     const updatedPlayers = state.players.map(player => {
-      // Get player's builds (use current player's newBuilds if it's them)
-      const playerRoads = player.id === state.currentPlayerId ? newBuilds.roads : (player.roads || 0)
-      const playerSettlements = player.id === state.currentPlayerId ? newBuilds.settlements : (player.settlements || 0)
-      const playerCities = player.id === state.currentPlayerId ? newBuilds.cities : (player.cities || 0)
-      const playerKnights = player.id === state.currentPlayerId ? newBuilds.knights : (player.knights || 0)
-      
-      let playerScore = (playerSettlements * 1) + (playerCities * 2)
-      
-      // Add bonuses
-      if (newLongestRoadHolder === player.id) playerScore += 2
-      if (newLargestArmyHolder === player.id) playerScore += 2
-      
-      return {
-        ...player,
-        score: playerScore,
-        roads: playerRoads,
-        settlements: playerSettlements,
-        cities: playerCities,
-        knights: playerKnights
+      if (player.id === state.currentPlayerId) {
+        // Update current player's builds
+        let playerScore = (newBuilds.settlements * 1) + (newBuilds.cities * 2)
+        
+        // Add bonuses
+        if (newLongestRoadHolder === player.id) playerScore += 2
+        if (newLargestArmyHolder === player.id) playerScore += 2
+        
+        return {
+          ...player,
+          score: playerScore,
+          roads: newBuilds.roads,
+          settlements: newBuilds.settlements,
+          cities: newBuilds.cities,
+          knights: newBuilds.knights
+        }
+      } else {
+        // For other players, only update their score if bonus holders changed
+        if (newLongestRoadHolder !== state.longestRoadHolder || newLargestArmyHolder !== state.largestArmyHolder) {
+          // Recalculate their score with new bonus holders
+          let playerScore = ((player.settlements || 0) * 1) + ((player.cities || 0) * 2)
+          if (newLongestRoadHolder === player.id) playerScore += 2
+          if (newLargestArmyHolder === player.id) playerScore += 2
+          
+          return {
+            ...player,
+            score: playerScore
+          }
+        }
+        // No changes for this player
+        return player
       }
     })
     

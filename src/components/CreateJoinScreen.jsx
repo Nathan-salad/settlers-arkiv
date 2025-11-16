@@ -6,6 +6,7 @@ export default function CreateJoinScreen({ onNavigate }) {
   const [roomCode, setRoomCode] = useState('')
   const [playerName, setPlayerName] = useState('')
   const [generatedCode, setGeneratedCode] = useState(null)
+  const [playerCount, setPlayerCount] = useState(2) // Default to 2 players
   
   const { resetGame } = useGameStore()
 
@@ -16,8 +17,8 @@ export default function CreateJoinScreen({ onNavigate }) {
   }
 
   const handleStartGame = () => {
-    // Reset game state before starting
-    resetGame()
+    // Reset game state before starting with selected player count
+    resetGame(playerCount)
     onNavigate('game')
   }
 
