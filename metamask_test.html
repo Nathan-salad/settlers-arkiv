@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>MetaMask Recover PubKey and Sign</title>
+  <!-- UMD build that exposes `ethers` global -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.10.0/ethers.umd.min.js"></script>
+</head>
+<body>
+  <h2>MetaMask Public Key Recovery</h2>
+  <button id="connect">Connect Wallet</button>
+  <button id="sign">Sign & Recover PubKey</button>
+
+  <script>
+    // MUST serve over http(s) for MetaMask to inject window.ethereum in Firefox.
+    let currentAddress = null;
+
+    document.getElementById("connect").onclick = async () => {
+      try {
+        if (!window.ethereum) {
+          console.error("MetaMask not detected (window.ethereum missing).");
+          return;
+        }
+        // Request accounts (prompts MetaMask)
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        currentAddress = accounts[0];
+        console.log("Connected address:", currentAddress);
+      } catch (err) {
+        console.error("Error connecting:", err);
+      }
+    };
+
+    document.getElementById("sign").onclick = async () => {
+      try {
+        if (!currentAddress) {
+          console.log("Please connect wallet first.");
+          return;
+        }
+
+        const message = "hello world"; // change as needed
+
+        // personal_sign expects hex-encoded message bytes
+        const encoder = new TextEncoder();
+        const hexMessage = "0x" + Array.from(encoder.encode(message))
+          .map(b => b.toString(16).padStart(2, "0")).join("");
+
+        // Ask MetaMask to sign the message (private key never leaves extension)
+        const signature = await window.ethereum.request({
+          method: "personal_sign",
+          params: [hexMessage, currentAddress]
+        });
+
+        console.log("Signature:", signature);
+
+        // Hash the message the same way ethers.hashMessage does (EIP-191 prefix)
+        const digest = ethers.hashMessage(message);
+        console.log("Digest (hashMessage):", digest);
+
+        // Convert signature into a Signature object (ethers.Signature)
+        const sigObj = ethers.Signature.from(signature);
+
+        // Use SigningKey.recoverPublicKey(hash, signatureObj)
+        const publicKey = ethers.SigningKey.recoverPublicKey(digest, sigObj);
+        console.log("Recovered public key (uncompressed, 0x04...):", publicKey);
+
+        // Derive address from recovered public key (should match currentAddress)
+        const recoveredAddress = ethers.computeAddress(publicKey);
+        console.log("Recovered address from pubkey:", recoveredAddress);
+
+        // Packageable payload you can send (or log)
+        const payload = {
+          message,
+          digest,
+          signature,
+          publicKey,
+          recoveredAddress
+        };
+
+        console.log("Payload you can send:", payload);
+      } catch (err) {
+        console.error("Error signing/recovering:", err);
+      }
+    };
+  </script>
+</body>
+</html>
