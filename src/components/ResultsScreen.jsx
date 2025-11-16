@@ -104,13 +104,13 @@ export default function ResultsScreen({ onNavigate }) {
                         {longestRoadHolder === player.id && (
                           <div className="inline-flex items-center gap-1 bg-cyber-blue/20 border border-cyber-blue text-cyber-blue px-2 py-0.5 rounded text-xs font-bold">
                             <span>|:|</span>
-                            <span>LONGEST</span>
+                            <span>Longest Road</span>
                           </div>
                         )}
                         {largestArmyHolder === player.id && (
                           <div className="inline-flex items-center gap-1 bg-cyber-pink/20 border border-cyber-pink text-cyber-pink px-2 py-0.5 rounded text-xs font-bold">
                             <span>{'>'}X{'<'}</span>
-                            <span>ARMY</span>
+                            <span>Largest Army</span>
                           </div>
                         )}
                       </div>
