@@ -102,15 +102,6 @@ export default function BuildBoard({ builds, playerName }) {
         })}
       </div>
 
-      {/* Total builds summary */}
-      <div className="mt-6 pt-4 border-t-2 border-cyber-blue/30">
-        <div className="flex justify-between items-center">
-          <span className="text-cyber-pink font-mono text-sm">TOTAL BUILDS</span>
-          <span className="text-cyber-green font-mono text-2xl font-bold">
-            {Object.values(builds).reduce((sum, val) => sum + val, 0)}
-          </span>
-        </div>
-      </div>
     </div>
   )
 }
