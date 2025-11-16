@@ -23,6 +23,8 @@ export default function GameTable({ onNavigate }) {
   const dice = store.dice || []
   const status = store.status || 'in_progress'
   const hasBuilt = store.hasBuilt || false
+  const longestRoadHolder = store.longestRoadHolder
+  const largestArmyHolder = store.largestArmyHolder
   const rollDice = store.rollDice
   const toggleLock = store.toggleLock
   const performBuild = store.performBuild
@@ -302,7 +304,23 @@ export default function GameTable({ onNavigate }) {
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <div className="font-bold text-cyber-blue">{player.name}</div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="font-bold text-cyber-blue">{player.name}</div>
+                          {/* Longest Road Badge */}
+                          {longestRoadHolder === player.id && (
+                            <div className="inline-flex items-center gap-1 bg-cyber-blue/20 border border-cyber-blue text-cyber-blue px-2 py-0.5 rounded text-xs font-bold animate-pulse">
+                              <span>🛣️</span>
+                              <span>LONGEST</span>
+                            </div>
+                          )}
+                          {/* Largest Army Badge */}
+                          {largestArmyHolder === player.id && (
+                            <div className="inline-flex items-center gap-1 bg-cyber-pink/20 border border-cyber-pink text-cyber-pink px-2 py-0.5 rounded text-xs font-bold animate-pulse">
+                              <span>⚔️</span>
+                              <span>ARMY</span>
+                            </div>
+                          )}
+                        </div>
                         <div className="text-xs text-cyber-pink font-mono mt-1">
                           VP: {player.score}/{victoryPointGoal}
                         </div>
