@@ -12,8 +12,11 @@ export default function TurnNotification({ playerName, show, onComplete }) {
       const timer = setTimeout(() => {
         setVisible(false)
         onComplete?.()
-      }, 2000)
+      }, 1500) // Reduced from 2000ms to 1500ms
       return () => clearTimeout(timer)
+    } else {
+      // Immediately hide when show becomes false
+      setVisible(false)
     }
   }, [show, onComplete])
 
