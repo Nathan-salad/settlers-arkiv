@@ -165,9 +165,17 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
                             <div className="text-xs text-cyber-blue/70 mb-1">
                               {count} {category.bonus ? '' : `× ${category.pointValue} VP`}
                             </div>
-                            <div className="text-2xl font-bold text-cyber-green mb-1">
-                              {score}
-                            </div>
+                            {/* Only show score if it's not 0 (roads/knights have 0 VP) */}
+                            {score > 0 && (
+                              <div className="text-2xl font-bold text-cyber-green mb-1">
+                                {score}
+                              </div>
+                            )}
+                            {score === 0 && !category.bonus && (
+                              <div className="text-2xl font-bold text-cyber-blue/30 mb-1">
+                                -
+                              </div>
+                            )}
                             {/* Progress bar */}
                             <div className="w-full h-1 bg-cyber-darker rounded-full overflow-hidden">
                               <div 
