@@ -12,22 +12,22 @@ import { getDiceResources, canBuild, getMissingResources, formatResourceName } f
 import { getAvailableResources } from '../utils/resourceConsumption'
 
 export default function GameTable({ onNavigate }) {
-  const { 
-    players, 
-    currentPlayerId, 
-    turnNumber, 
-    rollCount, 
-    maxRolls,
-    maxTurns,
-    dice, 
-    status,
-    builds,
-    hasBuilt,
-    rollDice, 
-    toggleLock,
-    performBuild,
-    endTurn 
-  } = useGameStore()
+  const store = useGameStore()
+  
+  const players = store.players || []
+  const currentPlayerId = store.currentPlayerId || '1'
+  const turnNumber = store.turnNumber || 1
+  const rollCount = store.rollCount || 0
+  const maxRolls = store.maxRolls || 3
+  const victoryPointGoal = store.victoryPointGoal || 10
+  const dice = store.dice || []
+  const status = store.status || 'in_progress'
+  const builds = store.builds || {}
+  const hasBuilt = store.hasBuilt || false
+  const rollDice = store.rollDice
+  const toggleLock = store.toggleLock
+  const performBuild = store.performBuild
+  const endTurn = store.endTurn
 
   const [isRolling, setIsRolling] = useState(false)
   const [showScoreSheet, setShowScoreSheet] = useState(false)
@@ -36,7 +36,7 @@ export default function GameTable({ onNavigate }) {
   const [lastBuild, setLastBuild] = useState(null)
   const [showBuildAnimation, setShowBuildAnimation] = useState(false)
 
-  const currentPlayer = players.find(p => p.id === currentPlayerId)
+  const currentPlayer = players.find(p => p.id === currentPlayerId) || { name: 'Player 1', score: 0 }
   const canRoll = rollCount < maxRolls && !hasBuilt // Can't roll after building
   const hasRolled = rollCount > 0
   
@@ -136,23 +136,19 @@ export default function GameTable({ onNavigate }) {
     <div className="min-h-screen p-4">
       <div className="max-w-7xl mx-auto">
         {/* HUD */}
-        <div className="mb-6 bg-cyber-darker border-2 border-cyber-blue p-4 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div className="bg-cyber-darker border-2 border-cyber-blue p-6 mb-6 rounded-lg">
+          <div className="grid grid-cols-3 gap-4 text-center font-mono">
             <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">CURRENT PLAYER</div>
-              <div className="text-lg font-bold text-cyber-blue">{currentPlayer?.name}</div>
+              <div className="text-cyber-blue text-sm">CURRENT PLAYER</div>
+              <div className="text-2xl font-bold text-cyber-green">{currentPlayer?.name || 'Player 1'}</div>
             </div>
             <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">TURN</div>
-              <div className="text-lg font-bold text-cyber-green">{turnNumber} / {maxTurns}</div>
+              <div className="text-cyber-blue text-sm">VICTORY POINTS</div>
+              <div className="text-2xl font-bold text-cyber-purple">{currentPlayer?.score || 0} / {victoryPointGoal}</div>
             </div>
             <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">ROLLS</div>
-              <div className="text-lg font-bold text-cyber-purple">{rollCount} / {maxRolls}</div>
-            </div>
-            <div>
-              <div className="text-xs text-cyber-pink font-mono mb-1">SCORE</div>
-              <div className="text-lg font-bold text-cyber-pink">{currentPlayer?.score}</div>
+              <div className="text-cyber-blue text-sm">TURN</div>
+              <div className="text-2xl font-bold text-cyber-pink">#{turnNumber}</div>
             </div>
           </div>
         </div>
@@ -287,7 +283,7 @@ export default function GameTable({ onNavigate }) {
                       <div>
                         <div className="font-bold text-cyber-blue">{player.name}</div>
                         <div className="text-xs text-cyber-pink font-mono mt-1">
-                          Turns: {player.turnsCompleted}/{maxTurns}
+                          VP: {player.score}/{victoryPointGoal}
                         </div>
                       </div>
                       <div className="text-2xl font-bold text-cyber-green">

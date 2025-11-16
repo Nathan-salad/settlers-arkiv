@@ -31,7 +31,7 @@ export default function LandingScreen({ onNavigate }) {
         {/* Subtitle */}
         <div className="mt-16 text-cyber-green text-sm md:text-base font-mono opacity-70">
           <p>&gt; 2-4 PLAYERS</p>
-          <p>&gt; 15 TURNS</p>
+          <p>&gt; FIRST TO 10 VICTORY POINTS</p>
           <p>&gt; REAL-TIME MULTIPLAYER</p>
         </div>
       </div>

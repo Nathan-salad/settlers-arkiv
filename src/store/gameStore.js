@@ -14,7 +14,7 @@ const useGameStore = create((set) => ({
   turnNumber: 1,
   rollCount: 0,
   maxRolls: 3,
-  maxTurns: 15,
+  victoryPointGoal: 10, // Island Two: First to 10 VP wins
   dice: [
     { value: 1, locked: false, used: false },
     { value: 2, locked: false, used: false },
@@ -33,6 +33,10 @@ const useGameStore = create((set) => ({
     cities: 0,
     knights: 0,
   },
+  
+  // Special victory point bonuses
+  longestRoadHolder: null, // Player ID who has Longest Road (5+ roads, 2 VP)
+  largestArmyHolder: null, // Player ID who has Largest Army (3+ knights, 2 VP)
 
   // Actions
   rollDice: () => set((state) => {
@@ -88,32 +92,85 @@ const useGameStore = create((set) => ({
     // Consume resources (mark dice as used)
     const updatedDice = consumeResources(state.dice, requiredResources)
     
-    // Calculate score based on builds (simplified scoring)
-    const scoreValues = {
-      roads: 1,
-      settlements: 3,
-      cities: 5,
-      knights: 2
+    // Calculate score based on Island Two rules
+    // Settlements: 1 VP each, Cities: 2 VP each
+    // Roads and Knights: 0 VP individually (bonuses calculated separately)
+    const baseScore = (newBuilds.settlements * 1) + (newBuilds.cities * 2)
+    
+    // Check for Longest Road (5+ roads, 2 VP bonus)
+    let newLongestRoadHolder = state.longestRoadHolder
+    if (newBuilds.roads >= 5) {
+      // Current player has 5+ roads
+      if (!newLongestRoadHolder) {
+        // No one has it yet, current player gets it
+        newLongestRoadHolder = state.currentPlayerId
+      } else if (newLongestRoadHolder !== state.currentPlayerId) {
+        // Someone else has it, check if current player has more
+        const holderRoads = state.players.find(p => p.id === newLongestRoadHolder)?.roads || 0
+        if (newBuilds.roads > holderRoads) {
+          newLongestRoadHolder = state.currentPlayerId
+        }
+      }
     }
     
-    const newScore = Object.keys(newBuilds).reduce((total, key) => {
-      return total + (newBuilds[key] * (scoreValues[key] || 0))
-    }, 0)
+    // Check for Largest Army (3+ knights, 2 VP bonus)
+    let newLargestArmyHolder = state.largestArmyHolder
+    if (newBuilds.knights >= 3) {
+      // Current player has 3+ knights
+      if (!newLargestArmyHolder) {
+        // No one has it yet, current player gets it
+        newLargestArmyHolder = state.currentPlayerId
+      } else if (newLargestArmyHolder !== state.currentPlayerId) {
+        // Someone else has it, check if current player has more
+        const holderKnights = state.players.find(p => p.id === newLargestArmyHolder)?.knights || 0
+        if (newBuilds.knights > holderKnights) {
+          newLargestArmyHolder = state.currentPlayerId
+        }
+      }
+    }
     
-    // Update current player's score
-    const updatedPlayers = state.players.map(player =>
-      player.id === state.currentPlayerId
-        ? { ...player, score: newScore }
-        : player
-    )
+    // Calculate final scores for all players with bonuses
+    const updatedPlayers = state.players.map(player => {
+      // Get player's builds (use current player's newBuilds if it's them)
+      const playerRoads = player.id === state.currentPlayerId ? newBuilds.roads : (player.roads || 0)
+      const playerSettlements = player.id === state.currentPlayerId ? newBuilds.settlements : (player.settlements || 0)
+      const playerCities = player.id === state.currentPlayerId ? newBuilds.cities : (player.cities || 0)
+      const playerKnights = player.id === state.currentPlayerId ? newBuilds.knights : (player.knights || 0)
+      
+      let playerScore = (playerSettlements * 1) + (playerCities * 2)
+      
+      // Add bonuses
+      if (newLongestRoadHolder === player.id) playerScore += 2
+      if (newLargestArmyHolder === player.id) playerScore += 2
+      
+      return {
+        ...player,
+        score: playerScore,
+        roads: playerRoads,
+        settlements: playerSettlements,
+        cities: playerCities,
+        knights: playerKnights
+      }
+    })
     
     console.log(`[STORE] Build complete, resources consumed, dice updated, turn ending`)
+    
+    // Check for winner (Island Two: First to 10 VP)
+    const winner = updatedPlayers.find(p => p.score >= 10)
+    const gameFinished = winner !== undefined
+    
+    if (gameFinished) {
+      console.log(`[STORE] GAME OVER! ${winner.name} wins with ${winner.score} points!`)
+    }
     
     return {
       builds: newBuilds,
       players: updatedPlayers,
       dice: updatedDice,
-      hasBuilt: true // Mark that player has built this turn
+      hasBuilt: true, // Mark that player has built this turn
+      status: gameFinished ? 'finished' : state.status,
+      longestRoadHolder: newLongestRoadHolder,
+      largestArmyHolder: newLargestArmyHolder
     }
   }),
 
@@ -130,7 +187,14 @@ const useGameStore = create((set) => ({
     )
     
     const newTurnNumber = isLastPlayer ? state.turnNumber + 1 : state.turnNumber
-    const gameFinished = newTurnNumber > state.maxTurns
+    
+    // Check for winner (Island Two: First to 10 VP)
+    const winner = updatedPlayers.find(p => p.score >= state.victoryPointGoal)
+    const gameFinished = winner !== undefined
+    
+    if (gameFinished) {
+      console.log(`[STORE] GAME OVER at end of turn! ${winner.name} wins with ${winner.score} points!`)
+    }
 
     return {
       players: updatedPlayers,
@@ -146,10 +210,18 @@ const useGameStore = create((set) => ({
   }),
 
   resetGame: () => set({
+    players: [
+      { id: '1', name: 'Player 1', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
+      { id: '2', name: 'Player 2', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
+      { id: '3', name: 'Player 3', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
+      { id: '4', name: 'Player 4', score: 0, turnsCompleted: 0, roads: 0, settlements: 0, cities: 0, knights: 0 },
+    ],
+    currentPlayerId: '1',
     turnNumber: 1,
     rollCount: 0,
     hasBuilt: false,
-    currentPlayerId: '1',
+    maxRolls: 3,
+    victoryPointGoal: 10,
     dice: [
       { value: 1, locked: false, used: false },
       { value: 2, locked: false, used: false },
@@ -164,6 +236,8 @@ const useGameStore = create((set) => ({
       cities: 0,
       knights: 0,
     },
+    longestRoadHolder: null,
+    largestArmyHolder: null,
     status: 'in_progress'
   })
 }))

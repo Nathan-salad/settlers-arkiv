@@ -1,72 +1,83 @@
 import ResourceIcon from './ResourceIcon'
+import useGameStore from '../store/gameStore'
 
 export default function ScoreSheet({ players, currentPlayerId, onClose }) {
-  // Scoring categories based on Catan Dice Game rules
+  const { longestRoadHolder, largestArmyHolder } = useGameStore()
+  
+  // Island Two scoring categories
   const scoreCategories = [
-    { 
-      id: 'roads', 
-      label: 'Roads', 
-      icon: 'lumber',
-      description: 'Longest road network',
-      maxScore: 10 
-    },
     { 
       id: 'settlements', 
       label: 'Settlements', 
       icon: 'wheat',
-      description: 'Settlement locations',
-      maxScore: 15 
+      description: '1 VP each',
+      pointValue: 1,
+      maxCount: 5
     },
     { 
       id: 'cities', 
       label: 'Cities', 
       icon: 'ore',
-      description: 'Upgraded settlements',
-      maxScore: 20 
+      description: '2 VP each',
+      pointValue: 2,
+      maxCount: 4
+    },
+    { 
+      id: 'roads', 
+      label: 'Roads', 
+      icon: 'lumber',
+      description: '0 VP (bonus only)',
+      pointValue: 0,
+      maxCount: 15
     },
     { 
       id: 'knights', 
       label: 'Knights', 
       icon: 'wool',
-      description: 'Largest army',
-      maxScore: 13 
+      description: '0 VP (bonus only)',
+      pointValue: 0,
+      maxCount: 14
     },
     { 
-      id: 'bonus', 
-      label: 'Bonus Points', 
+      id: 'longestRoad', 
+      label: 'Longest Road', 
+      icon: 'brick',
+      description: '5+ roads',
+      bonus: true,
+      bonusValue: 2
+    },
+    { 
+      id: 'largestArmy', 
+      label: 'Largest Army', 
       icon: 'gold',
-      description: 'Special achievements',
-      maxScore: 5 
+      description: '3+ knights',
+      bonus: true,
+      bonusValue: 2
     }
   ]
 
-  const calculateCategoryScore = (player, category) => {
-    // Use player's actual score for now
-    // TODO: Break down score by category when backend tracks individual builds per player
-    
-    // For demo, distribute score across categories proportionally
-    const totalScore = player.score || 0
-    
-    switch(category) {
-      case 'roads':
-        return Math.floor(totalScore * 0.15) // ~15% of total
-      case 'settlements':
-        return Math.floor(totalScore * 0.25) // ~25% of total
-      case 'cities':
-        return Math.floor(totalScore * 0.35) // ~35% of total
-      case 'knights':
-        return Math.floor(totalScore * 0.20) // ~20% of total
-      case 'bonus':
-        return Math.floor(totalScore * 0.05) // ~5% of total
-      default:
-        return 0
+  const getPlayerCategoryScore = (player, category) => {
+    if (category.bonus) {
+      // Check for special bonuses
+      if (category.id === 'longestRoad') {
+        return longestRoadHolder === player.id ? category.bonusValue : 0
+      }
+      if (category.id === 'largestArmy') {
+        return largestArmyHolder === player.id ? category.bonusValue : 0
+      }
+      return 0
     }
+    
+    // Regular builds
+    const count = player[category.id] || 0
+    return count * category.pointValue
   }
-
-  const calculateTotal = (player) => {
-    return scoreCategories.reduce((sum, cat) => 
-      sum + calculateCategoryScore(player, cat.id), 0
-    )
+  
+  const getPlayerCategoryCount = (player, category) => {
+    if (category.bonus) {
+      return getPlayerCategoryScore(player, category) > 0 ? '✓' : '-'
+    }
+    return player[category.id] || 0
   }
 
   return (
@@ -133,18 +144,26 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
                             {category.description}
                           </div>
                           <div className="text-xs text-cyber-green/50 font-mono mt-1">
-                            Max: {category.maxScore} pts
+                            {category.bonus 
+                              ? `Bonus: ${category.bonusValue} VP`
+                              : `Max: ${category.maxCount}`
+                            }
                           </div>
                         </div>
                       </div>
                     </td>
                     {players.map(player => {
-                      const score = calculateCategoryScore(player, category.id)
-                      const percentage = (score / category.maxScore) * 100
+                      const count = getPlayerCategoryCount(player, category)
+                      const score = getPlayerCategoryScore(player, category)
+                      const maxValue = category.bonus ? category.bonusValue : (category.maxCount * category.pointValue)
+                      const percentage = maxValue > 0 ? (score / maxValue) * 100 : 0
                       
                       return (
                         <td key={player.id} className="p-4 text-center">
                           <div className="relative">
+                            <div className="text-xs text-cyber-blue/70 mb-1">
+                              {count} {category.bonus ? '' : `× ${category.pointValue} VP`}
+                            </div>
                             <div className="text-2xl font-bold text-cyber-green mb-1">
                               {score}
                             </div>
@@ -152,7 +171,7 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
                             <div className="w-full h-1 bg-cyber-darker rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-cyber-green transition-all duration-300"
-                                style={{ width: `${percentage}%` }}
+                                style={{ width: `${Math.min(percentage, 100)}%` }}
                               />
                             </div>
                           </div>
@@ -172,7 +191,7 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
                   {players.map(player => (
                     <td key={player.id} className="p-4 text-center">
                       <div className="text-4xl font-bold text-cyber-purple">
-                        {calculateTotal(player)}
+                        {player.score || 0}
                       </div>
                     </td>
                   ))}
@@ -184,23 +203,26 @@ export default function ScoreSheet({ players, currentPlayerId, onClose }) {
           {/* Legend */}
           <div className="mt-8 p-4 border-2 border-cyber-blue/30 rounded-lg">
             <h3 className="text-sm font-bold text-cyber-blue mb-3 font-mono">
-              [SCORING GUIDE]
+              [ISLAND TWO SCORING]
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-cyber-blue/70 font-mono">
               <div>
-                <span className="text-cyber-pink">Roads:</span> 1 point each (max 10)
+                <span className="text-cyber-pink">Settlements:</span> 1 VP each (max 5)
               </div>
               <div>
-                <span className="text-cyber-pink">Settlements:</span> 3 points each (max 15)
+                <span className="text-cyber-pink">Cities:</span> 2 VP each (max 4)
               </div>
               <div>
-                <span className="text-cyber-pink">Cities:</span> 5 points each (max 20)
+                <span className="text-cyber-pink">Roads:</span> 0 VP individually (max 15)
               </div>
               <div>
-                <span className="text-cyber-pink">Knights:</span> 2 points each (max 13)
+                <span className="text-cyber-pink">Knights:</span> 0 VP individually (max 14)
               </div>
-              <div className="md:col-span-2">
-                <span className="text-cyber-pink">Bonus:</span> Longest road, largest army, etc.
+              <div>
+                <span className="text-cyber-green">Longest Road:</span> +2 VP (5+ roads, first to reach)
+              </div>
+              <div>
+                <span className="text-cyber-green">Largest Army:</span> +2 VP (3+ knights, first to reach)
               </div>
             </div>
           </div>
